@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Shield, User, Edit, MoreHorizontal } from 'lucide-react';
 import {
@@ -26,7 +25,9 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import PageHeader from '@/components/PageHeader';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/enums/User';
+import { User as UserModel } from '@/models/User';
 import { useToast } from '@/components/ui/use-toast';
 
 // Mock user data for demo
@@ -35,26 +36,26 @@ const mockUsers = [
     id: '1',
     name: 'Jane Cooper',
     email: 'jane@example.com',
-    role: 'admin' as UserRole,
+    role: UserRole.ADMIN,
     profileImage: '/lovable-uploads/439db2b7-c4d3-4bd9-ab25-68e85d686991.png',
   },
   {
     id: '2',
     name: 'John Smith',
     email: 'john@example.com',
-    role: 'joiner' as UserRole,
+    role: UserRole.JOINER,
   },
   {
     id: '3',
     name: 'Emily Davis',
     email: 'emily@example.com',
-    role: 'joiner' as UserRole,
+    role: UserRole.JOINER,
   },
   {
     id: '4',
     name: 'Michael Brown',
     email: 'michael@example.com',
-    role: 'joiner' as UserRole,
+    role: UserRole.JOINER,
   },
 ];
 
@@ -67,7 +68,7 @@ const Users = () => {
   const [newRole, setNewRole] = useState<UserRole | ''>('');
   
   // Check if user has admin permission
-  if (!hasPermission('admin')) {
+  if (!hasPermission(UserRole.ADMIN)) {
     return <div className="p-6">Unauthorized access</div>;
   }
   
@@ -172,9 +173,9 @@ const Users = () => {
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="joiner">Joiner</SelectItem>
-                <SelectItem value="guest">Guest</SelectItem>
+                <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                <SelectItem value={UserRole.JOINER}>Joiner</SelectItem>
+                <SelectItem value={UserRole.GUEST}>Guest</SelectItem>
               </SelectContent>
             </Select>
           </div>

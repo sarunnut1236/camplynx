@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -119,30 +118,43 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
   const [registrations, setRegistrations] = useState<Registration[]>(initialRegistrations);
   const { toast } = useToast();
 
-  // Load saved data on mount
+  // Load saved data from localStorage if it exists
+  const loadSavedData = () => {
+    try {
+      const savedCamps = localStorage.getItem('yns_camps');
+      const savedRegistrations = localStorage.getItem('yns_registrations');
+      
+      if (!savedCamps) {
+        // Initialize with sample data if no saved data
+        setCamps(initialCamps);
+        localStorage.setItem('yns_camps', JSON.stringify(initialCamps));
+      } else {
+        setCamps(JSON.parse(savedCamps));
+      }
+      
+      if (savedRegistrations) {
+        setRegistrations(JSON.parse(savedRegistrations));
+      }
+    } catch (error) {
+      console.error("Error loading saved data:", error);
+    }
+  };
+
+  // Call loadSavedData on component mount
   useEffect(() => {
-    const savedCamps = localStorage.getItem('camplynx_camps');
-    const savedRegistrations = localStorage.getItem('camplynx_registrations');
-
-    if (savedCamps) {
-      setCamps(JSON.parse(savedCamps));
-    } else {
-      localStorage.setItem('camplynx_camps', JSON.stringify(initialCamps));
-    }
-
-    if (savedRegistrations) {
-      setRegistrations(JSON.parse(savedRegistrations));
-    }
+    loadSavedData();
   }, []);
 
-  // Save data on change
+  // Save camps data to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('camplynx_camps', JSON.stringify(camps));
-  }, [camps]);
-
-  useEffect(() => {
-    localStorage.setItem('camplynx_registrations', JSON.stringify(registrations));
-  }, [registrations]);
+    if (camps) {
+      localStorage.setItem('yns_camps', JSON.stringify(camps));
+    }
+    
+    if (registrations) {
+      localStorage.setItem('yns_registrations', JSON.stringify(registrations));
+    }
+  }, [camps, registrations]);
 
   // Create a new camp
   const createCamp = (campData: Omit<Camp, 'id'>) => {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Calendar, User, Clock } from 'lucide-react';
@@ -38,7 +37,7 @@ const Home = () => {
         <h2 className="text-xl font-semibold">
           Hello, {user?.name.split(' ')[0]}!
         </h2>
-        <p className="text-gray-600">Welcome to CampLynx</p>
+        <p className="text-gray-600">Welcome to YNS Backoffice</p>
       </div>
       
       {/* Upcoming activities */}

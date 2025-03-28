@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, User, Calendar, Settings } from 'lucide-react';
+import { Home, User, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const BottomNavigation = () => {
@@ -36,14 +35,6 @@ const BottomNavigation = () => {
       >
         <User size={24} />
         <span className="text-xs mt-1">Profile</span>
-      </Link>
-      
-      <Link 
-        to="/settings" 
-        className={cn("nav-item", location.pathname === '/settings' && "active")}
-      >
-        <Settings size={24} />
-        <span className="text-xs mt-1">Settings</span>
       </Link>
     </div>
   );

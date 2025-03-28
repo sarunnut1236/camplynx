@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowLeft, User } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -20,7 +19,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   const { user } = useAuth();
   
   // Don't show back button on main screens
-  const hideBackByDefault = ['/home', '/camps', '/profile', '/settings'];
+  const hideBackByDefault = ['/home', '/camps', '/profile'];
 
   return (
     <div className="flex items-center justify-between py-4 mb-4">

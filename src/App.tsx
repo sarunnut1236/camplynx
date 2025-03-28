@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,9 +18,9 @@ import Camps from "@/pages/Camps";
 import CampDetail from "@/pages/CampDetail";
 import CreateCamp from "@/pages/CreateCamp";
 import Users from "@/pages/Users";
-import Settings from "@/pages/Settings";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
+import { UserRole } from "./enums/User";
 
 const queryClient = new QueryClient();
 
@@ -60,18 +59,13 @@ const App = () => (
                   </ProtectedRoute>
                 } />
                 <Route path="/camps/create" element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute requiredRole={UserRole.ADMIN}>
                     <CreateCamp />
                   </ProtectedRoute>
                 } />
                 <Route path="/users" element={
-                  <ProtectedRoute requiredRole="admin">
+                  <ProtectedRoute requiredRole={UserRole.ADMIN}>
                     <Users />
-                  </ProtectedRoute>
-                } />
-                <Route path="/settings" element={
-                  <ProtectedRoute>
-                    <Settings />
                   </ProtectedRoute>
                 } />
                 <Route path="/unauthorized" element={<Unauthorized />} />

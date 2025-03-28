@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,8 +39,8 @@ const Welcome = () => {
               </svg>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-center text-gray-800">CampLynx</h1>
-          <p className="text-center text-gray-600 mt-2">Camp Management App</p>
+          <h1 className="text-3xl font-bold text-center text-gray-800">YNS Backoffice</h1>
+          <p className="text-center text-gray-600 mt-2">Management System</p>
         </div>
         <div className="mt-4 text-center">
           <p>Redirecting to home page...</p>
