@@ -1,35 +1,18 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useAuth, User } from '@/contexts/AuthContext';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Welcome = () => {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    // For demo purposes, we'll just log in with a default user
-    // In a real app, you would validate the email against a database
-    setTimeout(() => {
-      const demoUser: User = {
-        id: '1',
-        name: 'Jane Cooper',
-        email: email,
-        role: 'admin',
-        profileImage: '/lovable-uploads/439db2b7-c4d3-4bd9-ab25-68e85d686991.png'
-      };
-      
-      login(demoUser);
-      setLoading(false);
-    }, 1000);
-  };
+  // Automatically redirect to home page
+  useEffect(() => {
+    navigate('/home');
+  }, [navigate]);
 
+  // Just a loading screen while redirect happens
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-white to-camp-light">
       <div className="w-full max-w-md flex flex-col items-center">
@@ -60,50 +43,8 @@ const Welcome = () => {
           <h1 className="text-3xl font-bold text-center text-gray-800">CampLynx</h1>
           <p className="text-center text-gray-600 mt-2">Camp Management App</p>
         </div>
-
-        <div className="w-full bg-white rounded-lg shadow-md p-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <h2 className="text-xl font-semibold mb-6 text-center">Welcome Back!</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value="password" // Prefilled for demo
-                readOnly
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full bg-camp-primary hover:bg-camp-secondary"
-              disabled={loading}
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
-
-          <p className="text-center text-sm text-gray-500 mt-4">
-            For demo purposes, any email will work.
-          </p>
-        </div>
-        
-        <div className="mt-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <p className="text-center text-gray-600">Tap to continue to the home screen</p>
+        <div className="mt-4 text-center">
+          <p>Redirecting to home page...</p>
         </div>
       </div>
     </div>

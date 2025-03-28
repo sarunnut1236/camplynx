@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -31,7 +30,7 @@ interface AuthContextType {
 // Create context
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Initial user data (for demo purposes)
+// Initial user data
 const initialUsers: User[] = [
   {
     id: '1',
@@ -55,57 +54,38 @@ const initialUsers: User[] = [
 ];
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Use a default user instead of null
+  const defaultUser = initialUsers[0];
+  const [user, setUser] = useState<User | null>(defaultUser);
+  // Always authenticated
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check for saved user on mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem('camplynx_user');
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  // Login function
+  // Login function - still keeping this for functionality
   const login = (userData: User) => {
-    // For demo purposes, we'll use the mock data
-    const foundUser = initialUsers.find(u => u.email === userData.email);
+    const foundUser = initialUsers.find(u => u.email === userData.email) || defaultUser;
+    setUser(foundUser);
     
-    if (foundUser) {
-      setUser(foundUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('camplynx_user', JSON.stringify(foundUser));
-      
-      toast({
-        title: "Logged in successfully",
-        description: `Welcome back, ${foundUser.name}!`,
-      });
-      
-      navigate('/home');
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Logged in successfully",
+      description: `Welcome back, ${foundUser.name}!`,
+    });
+    
+    navigate('/home');
   };
 
-  // Logout function
+  // Logout function - still keeping this for functionality
   const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('camplynx_user');
-    navigate('/');
+    // Instead of nullifying the user, set it back to default
+    setUser(defaultUser);
     
     toast({
       title: "Logged out",
       description: "You have been logged out successfully.",
     });
+    
+    navigate('/home');
   };
 
   // Update user function
@@ -113,7 +93,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) {
       const updatedUser = { ...user, ...data };
       setUser(updatedUser);
-      localStorage.setItem('camplynx_user', JSON.stringify(updatedUser));
       
       toast({
         title: "Profile updated",
@@ -122,16 +101,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Permission check function
+  // Permission check function - allow all permissions
   const hasPermission = (requiredRole: UserRole): boolean => {
-    if (!user) return false;
-    
-    // Role hierarchy: admin > joiner > guest
-    if (user.role === 'admin') return true;
-    if (user.role === 'joiner' && requiredRole !== 'admin') return true;
-    if (user.role === 'guest' && requiredRole === 'guest') return true;
-    
-    return false;
+    // Always return true to bypass permission checks
+    return true;
   };
 
   return (

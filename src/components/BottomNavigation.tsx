@@ -3,14 +3,12 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, User, Calendar, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
 
 const BottomNavigation = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
   
-  // Don't show bottom nav on welcome screen
-  if (!isAuthenticated || location.pathname === '/') {
+  // Only hide on the welcome page which now auto-redirects
+  if (location.pathname === '/') {
     return null;
   }
 
