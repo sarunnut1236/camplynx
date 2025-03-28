@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,9 +27,9 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+    <BrowserRouter>
       <TooltipProvider>
-        <BrowserRouter>
+        <AuthProvider>
           <CampProvider>
             <div className="min-h-screen bg-camp-background">
               <Routes>
@@ -81,9 +82,9 @@ const App = () => (
               <Sonner />
             </div>
           </CampProvider>
-        </BrowserRouter>
+        </AuthProvider>
       </TooltipProvider>
-    </AuthProvider>
+    </BrowserRouter>
   </QueryClientProvider>
 );
 
