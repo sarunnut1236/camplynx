@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import PageHeader from '@/components/PageHeader';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCamp, Camp, CampDay } from '@/contexts/CampContext';
+import { useCamp } from '@/contexts/CampContext';
+import { Camp, CampDay } from '@/models/Camp';
 import { useTranslation } from 'react-i18next';
 import { UserRole } from '@/enums/User';
 const CreateCamp = () => {

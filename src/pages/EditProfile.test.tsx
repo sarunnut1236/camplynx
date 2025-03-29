@@ -3,6 +3,36 @@ import { render, screen, fireEvent, waitFor } from '../test/test-utils';
 import EditProfile from './EditProfile';
 import { UserRole, Region } from '@/enums/User';
 
+// Mock translations
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'editProfile.title': 'Edit Profile',
+        'editProfile.personalInfo': 'Personal Information',
+        'editProfile.firstname': 'First Name',
+        'editProfile.surname': 'Last Name',
+        'editProfile.nickname': 'Nickname',
+        'editProfile.email': 'Email',
+        'editProfile.phone': 'Phone',
+        'editProfile.region': 'Region',
+        'editProfile.clear': 'Clear',
+        'editProfile.cancel': 'Cancel',
+        'editProfile.save': 'Save Changes',
+        'editProfile.saving': 'Saving...',
+        'editProfile.loading': 'Loading...',
+        'editProfile.healthInfo': 'Health Information',
+        'editProfile.foodAllergy': 'Food Allergies',
+        'editProfile.medicalCondition': 'Medical Conditions',
+        'editProfile.additionalInfo': 'Additional Information',
+        'editProfile.jobTitle': 'Title',
+        'editProfile.bio': 'Bio'
+      };
+      return translations[key] || key;
+    }
+  })
+}));
+
 // Mock useAuth with updateUser function
 const mockUpdateUser = vi.fn();
 vi.mock('@/contexts/AuthContext', () => ({
@@ -57,7 +87,7 @@ describe('EditProfile', () => {
     render(<EditProfile />);
     
     // Get the firstname input and change its value
-    const firstnameInput = screen.getByLabelText(/First Name/i);
+    const firstnameInput = screen.getByLabelText('First Name *');
     fireEvent.change(firstnameInput, { target: { value: 'Updated Name' } });
     
     // Check if input value was updated
@@ -68,22 +98,30 @@ describe('EditProfile', () => {
     render(<EditProfile />);
     
     // Check initial email value
-    const emailInput = screen.getByLabelText(/Email/i);
+    const emailInput = screen.getByLabelText('Email');
     expect(emailInput).toHaveValue('john@example.com');
     
-    // Click the clear button for email
-    const emailClearButton = screen.getAllByText('Clear')[1]; // Second 'Clear' button is for email
-    fireEvent.click(emailClearButton);
+    // Find and click the clear button for email
+    const clearButtons = screen.getAllByText('Clear');
+    // Get the one next to Email label
+    const emailClearButton = Array.from(clearButtons).find(button => {
+      return button.closest('.form-group')?.contains(emailInput);
+    });
     
-    // Check if the email field was cleared
-    expect(emailInput).toHaveValue('');
+    if (emailClearButton) {
+      fireEvent.click(emailClearButton);
+      // Check if the email field was cleared
+      expect(emailInput).toHaveValue('');
+    } else {
+      throw new Error('Clear button for email not found');
+    }
   });
   
   it('submits form and updates user', async () => {
     render(<EditProfile />);
     
     // Change a value
-    const firstnameInput = screen.getByLabelText(/First Name/i);
+    const firstnameInput = screen.getByLabelText('First Name *');
     fireEvent.change(firstnameInput, { target: { value: 'Updated Name' } });
     
     // Submit the form
