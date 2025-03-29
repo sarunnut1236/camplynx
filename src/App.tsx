@@ -21,6 +21,8 @@ import CreateCamp from "@/pages/CreateCamp";
 import Users from "@/pages/Users";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
+import EditCamp from "@/pages/EditCamp";
+import CampParticipants from "@/pages/CampParticipants";
 import { UserRole } from "./enums/User";
 
 const queryClient = new QueryClient();
@@ -70,6 +72,16 @@ const App = () => (
                     <Route path="/camps/create" element={
                       <ProtectedRoute requiredRole={UserRole.ADMIN}>
                         <CreateCamp />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/camps/:id/edit" element={
+                      <ProtectedRoute requiredRole={UserRole.ADMIN}>
+                        <EditCamp />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/camps/:id/participants" element={
+                      <ProtectedRoute requiredRole={UserRole.ADMIN}>
+                        <CampParticipants />
                       </ProtectedRoute>
                     } />
                     <Route path="/users" element={

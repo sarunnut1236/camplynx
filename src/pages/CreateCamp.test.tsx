@@ -32,7 +32,7 @@ beforeEach(() => {
   // Default mock for useAuth
   vi.mocked(useAuth).mockReturnValue({
     hasPermission: (role: UserRole) => role === UserRole.ADMIN,
-    user: null,
+    user: { id: '1', firstname: 'Admin', role: UserRole.ADMIN },
     isAuthenticated: true,
     login: vi.fn(),
     logout: vi.fn(),

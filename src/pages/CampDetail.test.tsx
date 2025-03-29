@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CampDetail from './CampDetail';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 // Mock useParams and useNavigate
 const mockNavigate = vi.fn();
@@ -54,6 +55,7 @@ const mockRegistration = {
 // Mock useCamp hook
 const mockUpdateRegistration = vi.fn().mockImplementation(() => ({ success: true }));
 const mockRegisterForCamp = vi.fn().mockImplementation(() => ({ success: true }));
+const mockDeleteCamp = vi.fn().mockImplementation(() => true);
 
 vi.mock('@/contexts/CampContext', () => ({
   useCamp: () => ({
@@ -61,7 +63,8 @@ vi.mock('@/contexts/CampContext', () => ({
     getRegistrationByCampAndUser: (campId: string, userId: string) => 
       campId === '1' && userId === 'user1' ? mockRegistration : undefined,
     registerForCamp: mockRegisterForCamp,
-    updateRegistration: mockUpdateRegistration
+    updateRegistration: mockUpdateRegistration,
+    deleteCamp: mockDeleteCamp
   })
 }));
 
@@ -73,7 +76,9 @@ vi.mock('@/contexts/AuthContext', () => ({
       firstname: 'John',
       surname: 'Doe',
       role: 'admin'
-    }
+    },
+    hasPermission: () => true,
+    isAuthenticated: true
   })
 }));
 
@@ -87,7 +92,7 @@ vi.mock('@/components/ui/use-toast', () => ({
 // Mock Translations
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, options?: { [key: string]: any }) => {
       const translations: Record<string, string> = {
         'camps.schedule': 'Schedule',
         'camps.registration': 'Registration',
@@ -96,7 +101,19 @@ vi.mock('react-i18next', () => ({
         'camps.attendanceNote': 'Please ensure you can attend the days you select',
         'camps.updateAvailability': 'Update Availability',
         'camps.registerForCamp': 'Register for Camp',
-        'camps.registeredMessage': 'You are registered for this camp'
+        'camps.registeredMessage': 'You are registered for this camp',
+        'camps.deleteConfirmTitle': 'Delete Camp',
+        'camps.deleteConfirmMessage': 'Are you sure you want to delete this camp?',
+        'common.cancel': 'Cancel',
+        'common.delete': 'Delete',
+        'camps.edit': 'Edit',
+        'camps.delete': 'Delete',
+        'camps.viewParticipants': 'View Participants',
+        'camps.dayNumber': options && options['number'] ? `Day ${options['number']}` : 'Day',
+        'camps.activity': 'activity',
+        'camps.activities': 'activities',
+        'camps.planned': 'planned',
+        'camps.campImageAlt': 'Image of camp'
       };
       return translations[key] || key;
     },
@@ -104,6 +121,24 @@ vi.mock('react-i18next', () => ({
       language: 'en'
     }
   })
+}));
+
+// Mock the AlertDialog component
+vi.mock('@/components/ui/alert-dialog', () => ({
+  AlertDialog: ({ children, open, onOpenChange }: { children: React.ReactNode; open: boolean; onOpenChange: (open: boolean) => void }) => (
+    open ? <div data-testid="alert-dialog">{children}</div> : null
+  ),
+  AlertDialogContent: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-dialog-content">{children}</div>,
+  AlertDialogHeader: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-dialog-header">{children}</div>,
+  AlertDialogTitle: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-dialog-title">{children}</div>,
+  AlertDialogDescription: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-dialog-description">{children}</div>,
+  AlertDialogFooter: ({ children }: { children: React.ReactNode }) => <div data-testid="alert-dialog-footer">{children}</div>,
+  AlertDialogCancel: ({ children }: { children: React.ReactNode }) => (
+    <button data-testid="alert-dialog-cancel">{children}</button>
+  ),
+  AlertDialogAction: ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
+    <button data-testid="alert-dialog-action" onClick={onClick}>{children}</button>
+  )
 }));
 
 describe('CampDetail Page', () => {
@@ -236,6 +271,43 @@ describe('CampDetail Page', () => {
     // Verify the updateRegistration function was called
     await waitFor(() => {
       expect(mockUpdateRegistration).toHaveBeenCalledWith('reg1', { day1: true, day2: false });
+    });
+  });
+
+  it('shows delete dialog and deletes camp when confirmed', async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <MemoryRouter>
+        <CampDetail />
+      </MemoryRouter>
+    );
+    
+    // Wait for the component to be fully rendered
+    await waitFor(() => {
+      expect(screen.getByText('Test Description')).toBeInTheDocument();
+    });
+    
+    // Find and click the Delete button
+    const deleteButton = screen.getByRole('button', { name: /Delete/i });
+    await user.click(deleteButton);
+    
+    // Check that the confirmation dialog is displayed
+    await waitFor(() => {
+      expect(screen.getByTestId('alert-dialog')).toBeInTheDocument();
+      expect(screen.getByTestId('alert-dialog-title')).toBeInTheDocument();
+      expect(screen.getByText('Delete Camp')).toBeInTheDocument();
+      expect(screen.getByText('Are you sure you want to delete this camp?')).toBeInTheDocument();
+    });
+    
+    // Click the confirm button in the dialog
+    const confirmButton = screen.getByTestId('alert-dialog-action');
+    await user.click(confirmButton);
+    
+    // Verify deleteCamp was called and navigation happened
+    await waitFor(() => {
+      expect(mockDeleteCamp).toHaveBeenCalledWith('1');
+      expect(mockNavigate).toHaveBeenCalledWith('/camps');
     });
   });
 }); 

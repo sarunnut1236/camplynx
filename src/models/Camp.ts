@@ -16,6 +16,7 @@ export interface Camp {
   endDate: string;
   imageUrl: string;
   days: CampDay[];
+  ownerId?: string;  // ID of the admin who created the camp
 }
 
 // Define registration interface

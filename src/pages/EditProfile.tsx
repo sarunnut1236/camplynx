@@ -168,7 +168,7 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="page-container pb-20">
+    <div className="page-container pb-20 min-h-screen">
       <PageHeader title={t('editProfile.title')} />
       
       <form onSubmit={handleSubmit} className="space-y-6">

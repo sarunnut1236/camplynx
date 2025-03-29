@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,11 +12,16 @@ import { useCamp } from '@/contexts/CampContext';
 import { Camp, CampDay } from '@/models/Camp';
 import { useTranslation } from 'react-i18next';
 import { UserRole } from '@/enums/User';
-const CreateCamp = () => {
+
+const EditCamp = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { hasPermission, user } = useAuth();
-  const { createCamp } = useCamp();
+  const { getCampById, updateCamp } = useCamp();
   const { t } = useTranslation();
+  
+  // Get camp data 
+  const camp = getCampById(id || '');
   
   // Check if user has admin permission
   if (!hasPermission(UserRole.ADMIN)) {
@@ -30,23 +35,28 @@ const CreateCamp = () => {
     return null;
   }
   
+  // Check if camp exists
+  if (!camp) {
+    navigate('/camps');
+    return null;
+  }
+  
+  // Check if user is the owner of the camp or is an admin
+  if (camp.ownerId && camp.ownerId !== user.id) {
+    navigate('/unauthorized');
+    return null;
+  }
+  
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    location: '',
-    startDate: '',
-    endDate: '',
-    imageUrl: 'https://images.unsplash.com/photo-1496080174650-637e3f22fa03?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80', // Default image
+    name: camp.name,
+    description: camp.description,
+    location: camp.location,
+    startDate: camp.startDate,
+    endDate: camp.endDate,
+    imageUrl: camp.imageUrl,
   });
   
-  const [days, setDays] = useState<Omit<CampDay, 'id'>[]>([
-    {
-      dayNumber: 1,
-      date: '',
-      activities: ['']
-    }
-  ]);
-  
+  const [days, setDays] = useState<CampDay[]>(camp.days || []);
   const [loading, setLoading] = useState(false);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -59,9 +69,8 @@ const CreateCamp = () => {
       const newDays = [...prev];
       if (newDays[index]) {
         newDays[index] = { 
-          dayNumber: newDays[index].dayNumber, 
-          activities: newDays[index].activities,
-          date 
+          ...newDays[index],
+          date
         };
       }
       return newDays;
@@ -102,6 +111,7 @@ const CreateCamp = () => {
     setDays(prev => [
       ...prev,
       {
+        id: `day-${prev.length + 1}-${Date.now()}`,
         dayNumber: prev.length + 1,
         date: '',
         activities: ['']
@@ -124,32 +134,27 @@ const CreateCamp = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Create days with IDs
-    const campDays: CampDay[] = days.map((day, index) => ({
-      ...day,
-      id: `day-${index + 1}-${Date.now()}`,
-    }));
-    
-    // Create camp object
-    const campData: Omit<Camp, 'id'> = {
+    // Create updated camp object
+    const campData: Partial<Camp> = {
       ...formData,
-      days: campDays,
-      ownerId: user.id // Set current admin as owner
+      days,
+      // Keep the original owner
+      ownerId: camp.ownerId || user.id
     };
     
-    // Create camp
-    createCamp(campData);
+    // Update camp
+    updateCamp(camp.id, campData);
     
-    // Navigate back to camps list
+    // Navigate back to camp details
     setTimeout(() => {
       setLoading(false);
-      navigate('/camps');
+      navigate(`/camps/${camp.id}`);
     }, 500);
   };
-
+  
   return (
     <div className="page-container pb-20 min-h-screen">
-      <PageHeader title={t('camps.createNew')} />
+      <PageHeader title={t('camps.editCamp')} />
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic camp information */}
@@ -246,7 +251,7 @@ const CreateCamp = () => {
           <h3 className="text-lg font-medium mb-4">{t('camps.schedule')}</h3>
           
           {days.map((day, dayIndex) => (
-            <div key={dayIndex} className="mb-6 p-4 border rounded-lg bg-gray-50">
+            <div key={day.id} className="mb-6 p-4 border rounded-lg bg-gray-50">
               <div className="flex justify-between items-center mb-3">
                 <h4 className="font-medium">Day {day.dayNumber}</h4>
                 
@@ -255,40 +260,37 @@ const CreateCamp = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="h-8 w-8 p-0 text-red-500"
                     onClick={() => removeDay(dayIndex)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 size={16} />
+                    <span className="sr-only">Remove Day</span>
                   </Button>
                 )}
               </div>
               
-              <div className="form-group">
-                <Label htmlFor={`day-${dayIndex}-date`} className="form-label">
-                  {t('camps.date')} <span className="text-red-500">*</span>
-                </Label>
+              <div className="form-group mb-3">
+                <Label htmlFor={`day-${dayIndex}-date`} className="form-label">{t('camps.date')} <span className="text-red-500">*</span></Label>
                 <Input
                   id={`day-${dayIndex}-date`}
                   type="date"
                   value={day.date}
                   onChange={(e) => handleDayDateChange(dayIndex, e.target.value)}
                   className="form-input"
-                  min={formData.startDate}
-                  max={formData.endDate}
                   required
                 />
               </div>
               
-              <div className="mt-4">
+              <div className="space-y-3">
                 <Label className="form-label">{t('camps.activities')} <span className="text-red-500">*</span></Label>
                 
                 {day.activities.map((activity, activityIndex) => (
-                  <div key={activityIndex} className="flex items-center mb-2">
+                  <div key={activityIndex} className="flex gap-2">
                     <Input
                       value={activity}
                       onChange={(e) => handleActivityChange(dayIndex, activityIndex, e.target.value)}
-                      className="form-input mr-2"
-                      placeholder={`${t('camps.activity')} ${activityIndex + 1}`}
+                      className="form-input"
+                      placeholder={`Activity ${activityIndex + 1}`}
                       required
                     />
                     
@@ -297,10 +299,11 @@ const CreateCamp = () => {
                         type="button"
                         variant="ghost"
                         size="sm"
+                        className="h-10 w-10 p-0 text-red-500"
                         onClick={() => removeActivity(dayIndex, activityIndex)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2"
                       >
                         <Trash2 size={16} />
+                        <span className="sr-only">Remove Activity</span>
                       </Button>
                     )}
                   </div>
@@ -309,11 +312,10 @@ const CreateCamp = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  className="w-full mt-2"
                   onClick={() => addActivity(dayIndex)}
-                  className="mt-2"
                 >
-                  <Plus size={16} className="mr-1" />
+                  <Plus size={16} className="mr-2" />
                   {t('camps.addActivity')}
                 </Button>
               </div>
@@ -323,34 +325,37 @@ const CreateCamp = () => {
           <Button
             type="button"
             variant="outline"
-            className="w-full mt-2"
+            className="w-full mb-6"
             onClick={addDay}
           >
-            <Plus size={16} className="mr-1" />
+            <Plus size={16} className="mr-2" />
             {t('camps.addDay')}
           </Button>
         </div>
         
-        <div className="flex justify-between pt-4">
-          <Button 
-            type="button" 
-            variant="outline"
-            onClick={() => navigate('/camps')}
-          >
-            {t('common.cancel')}
-          </Button>
-          
-          <Button 
-            type="submit" 
-            className="bg-camp-primary hover:bg-camp-secondary"
-            disabled={loading}
-          >
-            {loading ? t('common.creating') : t('common.create')}
-          </Button>
+        <div className="sticky bottom-16 bg-white p-4 border-t">
+          <div className="flex gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => navigate(`/camps/${id}`)}
+            >
+              {t('common.cancel')}
+            </Button>
+            
+            <Button
+              type="submit"
+              className="flex-1 bg-camp-primary hover:bg-camp-secondary"
+              disabled={loading}
+            >
+              {loading ? t('common.saving') : t('common.saveChanges')}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
   );
 };
 
-export default CreateCamp;
+export default EditCamp; 

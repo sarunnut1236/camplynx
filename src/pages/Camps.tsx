@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Calendar, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,23 +7,27 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/enums/User';
 import { useTranslation } from 'react-i18next';
 
-const formatDateRange = (startDate: string, endDate: string) => {
-  const { i18n } = useTranslation();
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  
+// Pure function that doesn't use hooks
+const formatDate = (date: Date, language: string): string => {
   const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  return `${start.toLocaleDateString(i18n.language, options)} - ${end.toLocaleDateString(i18n.language, options)}`;
+  return date.toLocaleDateString(language, options);
 };
 
 const Camps = () => {
   const { camps } = useCamp();
   const { user, hasPermission } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAdmin = hasPermission(UserRole.ADMIN);
 
+  // Move the date formatting logic inside the component
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${formatDate(start, i18n.language)} - ${formatDate(end, i18n.language)}`;
+  };
+
   return (
-    <div className="page-container pb-20">
+    <div className="page-container pb-20 min-h-screen">
       <PageHeader 
         title={t('camps.title')} 
         showBackButton={false}
@@ -57,7 +60,7 @@ const Camps = () => {
             >
               <img 
                 src={camp.imageUrl} 
-                alt={camp.name}
+                alt={t('camps.campImageAlt', { name: camp.name })}
                 className="camp-image"
               />
               <div className="camp-content">

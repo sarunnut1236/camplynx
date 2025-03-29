@@ -1,19 +1,16 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { Camp, CampDay, Registration } from '@/models';
+import { Camp, Registration } from '@/models';
+import { useTranslation } from 'react-i18next';
 import {
   getAllCamps,
-  getCampById as getCampByIdProvider,
   createCamp as createCampProvider,
   updateCamp as updateCampProvider,
   deleteCamp as deleteCampProvider,
   getAllRegistrations,
-  getRegistrationById as getRegistrationByIdProvider,
   getRegistrationByCampAndUser as getRegistrationByCampAndUserProvider,
   registerForCamp as registerForCampProvider,
-  updateRegistration as updateRegistrationProvider,
-  getUserRegistrations as getUserRegistrationsProvider
-} from '@/providers/camps';
+  updateRegistration as updateRegistrationProvider} from '@/providers/camps';
 
 // Define context interface
 interface CampContextType {
@@ -28,6 +25,7 @@ interface CampContextType {
   getCampById: (id: string) => Camp | undefined;
   getRegistrationById: (id: string) => Registration | undefined;
   getRegistrationByCampAndUser: (campId: string, userId: string) => Registration | undefined;
+  searchCamps: (searchTerm: string) => Camp[];
 }
 
 // Create context
@@ -38,6 +36,7 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Load saved data
   useEffect(() => {
@@ -67,14 +66,14 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
       setCamps(prev => [...prev, newCamp]);
       
       toast({
-        title: "Camp created",
-        description: `${newCamp.name} has been created successfully.`,
+        title: t('toast.campCreated'),
+        description: t('toast.campCreatedDescription', { name: newCamp.name }),
       });
     } catch (error) {
       console.error("Error creating camp:", error);
       toast({
-        title: "Error",
-        description: "Failed to create camp. Please try again.",
+        title: t('toast.error'),
+        description: t('toast.createCampError'),
         variant: "destructive",
       });
     }
@@ -91,15 +90,15 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
         ));
         
         toast({
-          title: "Camp updated",
-          description: "The camp has been updated successfully.",
+          title: t('toast.campUpdated'),
+          description: t('toast.campUpdatedDescription'),
         });
       }
     } catch (error) {
       console.error("Error updating camp:", error);
       toast({
-        title: "Error",
-        description: "Failed to update camp. Please try again.",
+        title: t('toast.error'),
+        description: t('toast.updateCampError'),
         variant: "destructive",
       });
     }
@@ -115,15 +114,15 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
         setRegistrations(prev => prev.filter(reg => reg.campId !== id));
         
         toast({
-          title: "Camp deleted",
-          description: "The camp has been deleted successfully.",
+          title: t('toast.campDeleted'),
+          description: t('toast.campDeletedDescription'),
         });
       }
     } catch (error) {
       console.error("Error deleting camp:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete camp. Please try again.",
+        title: t('toast.error'),
+        description: t('toast.deleteCampError'),
         variant: "destructive",
       });
     }
@@ -137,8 +136,8 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
       
       if (existingReg) {
         toast({
-          title: "Already registered",
-          description: "You are already registered for this camp.",
+          title: t('toast.alreadyRegistered'),
+          description: t('toast.alreadyRegisteredDescription'),
           variant: "destructive",
         });
         return;
@@ -150,15 +149,15 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
         setRegistrations(prev => [...prev, newRegistration]);
         
         toast({
-          title: "Registration successful",
-          description: "You have been registered for the camp.",
+          title: t('toast.registrationSuccessful'),
+          description: t('toast.registrationSuccessfulDescription'),
         });
       }
     } catch (error) {
       console.error("Error registering for camp:", error);
       toast({
-        title: "Error",
-        description: "Failed to register for camp. Please try again.",
+        title: t('toast.error'),
+        description: t('toast.registerCampError'),
         variant: "destructive",
       });
     }
@@ -175,15 +174,15 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
         ));
         
         toast({
-          title: "Registration updated",
-          description: "Your availability has been updated successfully.",
+          title: t('toast.registrationUpdated'),
+          description: t('toast.registrationUpdatedDescription'),
         });
       }
     } catch (error) {
       console.error("Error updating registration:", error);
       toast({
-        title: "Error",
-        description: "Failed to update registration. Please try again.",
+        title: t('toast.error'),
+        description: t('toast.updateRegistrationError'),
         variant: "destructive",
       });
     }
@@ -209,6 +208,20 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
     return registrations.find(reg => reg.campId === campId && reg.userId === userId);
   };
 
+  // Search camps by name, description, or location
+  const searchCamps = (searchTerm: string): Camp[] => {
+    if (!searchTerm.trim()) {
+      return camps; // Return all camps if search term is empty
+    }
+    
+    const term = searchTerm.toLowerCase().trim();
+    return camps.filter(camp => 
+      camp.name.toLowerCase().includes(term) || 
+      camp.description.toLowerCase().includes(term) || 
+      camp.location.toLowerCase().includes(term)
+    );
+  };
+
   if (loading) {
     return null; // Or a loading spinner
   }
@@ -225,7 +238,8 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
       getUserRegistrations,
       getCampById,
       getRegistrationById,
-      getRegistrationByCampAndUser
+      getRegistrationByCampAndUser,
+      searchCamps
     }}>
       {children}
     </CampContext.Provider>

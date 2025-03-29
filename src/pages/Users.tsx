@@ -107,7 +107,7 @@ const Users = () => {
   };
 
   return (
-    <div className="page-container pb-20">
+    <div className="page-container pb-20 min-h-screen">
       <PageHeader title={t('users.manageUsers')} />
       
       <div className="mb-6">

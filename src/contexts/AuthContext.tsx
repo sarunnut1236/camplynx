@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { UserRole } from '@/enums/User';
 import { User } from '@/models/User';
-import { getAllUsers, getUserByEmail, getUserById, updateUser as updateUserInProvider, createDefaultUser } from '@/providers/users';
+import { getAllUsers, getUserByEmail, getUserById, updateUser as updateUserInProvider } from '@/providers/users';
 
 // Define auth context interface
 interface AuthContextType {
@@ -129,8 +129,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Permission check function - allow all permissions
   const hasPermission = (requiredRole: UserRole): boolean => {
-    // Always return true to bypass permission checks
-    return true;
+    // Check if user exists
+    if (!user) return false;
+    
+    // Parse roles as numbers for comparison (they're stored as strings)
+    const userRoleValue = parseInt(user.role);
+    const requiredRoleValue = parseInt(requiredRole);
+    
+    // Higher role value means more permissions
+    return userRoleValue >= requiredRoleValue;
   };
 
   if (loading) {

@@ -23,7 +23,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="page-container pb-20">
+    <div className="page-container pb-20 min-h-screen">
       <PageHeader 
         title={t('profile.title')} 
         showBackButton={false}
