@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
@@ -10,14 +9,16 @@ import { Separator } from '@/components/ui/separator';
 import PageHeader from '@/components/PageHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCamp, Camp, CampDay } from '@/contexts/CampContext';
-
+import { useTranslation } from 'react-i18next';
+import { UserRole } from '@/enums/User';
 const CreateCamp = () => {
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
   const { createCamp } = useCamp();
+  const { t } = useTranslation();
   
   // Check if user has admin permission
-  if (!hasPermission('admin')) {
+  if (!hasPermission(UserRole.ADMIN)) {
     navigate('/unauthorized');
     return null;
   }
@@ -49,7 +50,13 @@ const CreateCamp = () => {
   const handleDayDateChange = (index: number, date: string) => {
     setDays(prev => {
       const newDays = [...prev];
-      newDays[index] = { ...newDays[index], date };
+      if (newDays[index]) {
+        newDays[index] = { 
+          dayNumber: newDays[index].dayNumber, 
+          activities: newDays[index].activities,
+          date 
+        };
+      }
       return newDays;
     });
   };
@@ -57,7 +64,9 @@ const CreateCamp = () => {
   const handleActivityChange = (dayIndex: number, activityIndex: number, value: string) => {
     setDays(prev => {
       const newDays = [...prev];
-      newDays[dayIndex].activities[activityIndex] = value;
+      if (newDays[dayIndex] && newDays[dayIndex].activities) {
+        newDays[dayIndex].activities[activityIndex] = value;
+      }
       return newDays;
     });
   };
@@ -65,7 +74,9 @@ const CreateCamp = () => {
   const addActivity = (dayIndex: number) => {
     setDays(prev => {
       const newDays = [...prev];
-      newDays[dayIndex].activities.push('');
+      if (newDays[dayIndex]?.activities) {
+        newDays[dayIndex].activities.push('');
+      }
       return newDays;
     });
   };
@@ -73,7 +84,9 @@ const CreateCamp = () => {
   const removeActivity = (dayIndex: number, activityIndex: number) => {
     setDays(prev => {
       const newDays = [...prev];
-      newDays[dayIndex].activities = newDays[dayIndex].activities.filter((_, i) => i !== activityIndex);
+      if (newDays[dayIndex]?.activities) {
+        newDays[dayIndex].activities = newDays[dayIndex].activities.filter((_, i) => i !== activityIndex);
+      }
       return newDays;
     });
   };
@@ -128,13 +141,13 @@ const CreateCamp = () => {
 
   return (
     <div className="page-container pb-20">
-      <PageHeader title="Create New Camp" />
+      <PageHeader title={t('camps.createNew')} />
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic camp information */}
         <div className="space-y-4">
           <div className="form-group">
-            <Label htmlFor="name" className="form-label">Camp Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="name" className="form-label">{t('camps.name')} <span className="text-red-500">*</span></Label>
             <Input
               id="name"
               name="name"
@@ -147,7 +160,7 @@ const CreateCamp = () => {
           </div>
           
           <div className="form-group">
-            <Label htmlFor="description" className="form-label">Description <span className="text-red-500">*</span></Label>
+            <Label htmlFor="description" className="form-label">{t('camps.description')} <span className="text-red-500">*</span></Label>
             <Textarea
               id="description"
               name="description"
@@ -161,7 +174,7 @@ const CreateCamp = () => {
           </div>
           
           <div className="form-group">
-            <Label htmlFor="location" className="form-label">Location <span className="text-red-500">*</span></Label>
+            <Label htmlFor="location" className="form-label">{t('camps.location')} <span className="text-red-500">*</span></Label>
             <Input
               id="location"
               name="location"
@@ -175,7 +188,7 @@ const CreateCamp = () => {
           
           <div className="grid grid-cols-2 gap-4">
             <div className="form-group">
-              <Label htmlFor="startDate" className="form-label">Start Date <span className="text-red-500">*</span></Label>
+              <Label htmlFor="startDate" className="form-label">{t('camps.startDate')} <span className="text-red-500">*</span></Label>
               <Input
                 id="startDate"
                 name="startDate"
@@ -188,7 +201,7 @@ const CreateCamp = () => {
             </div>
             
             <div className="form-group">
-              <Label htmlFor="endDate" className="form-label">End Date <span className="text-red-500">*</span></Label>
+              <Label htmlFor="endDate" className="form-label">{t('camps.endDate')} <span className="text-red-500">*</span></Label>
               <Input
                 id="endDate"
                 name="endDate"
@@ -203,7 +216,7 @@ const CreateCamp = () => {
           </div>
           
           <div className="form-group">
-            <Label htmlFor="imageUrl" className="form-label">Image URL</Label>
+            <Label htmlFor="imageUrl" className="form-label">{t('camps.imageUrl')}</Label>
             <Input
               id="imageUrl"
               name="imageUrl"
@@ -213,7 +226,7 @@ const CreateCamp = () => {
               placeholder="https://example.com/image.jpg"
             />
             <p className="text-xs text-gray-500 mt-1">
-              A default image will be used if not provided
+              {t('camps.defaultImage')}
             </p>
           </div>
         </div>
@@ -222,7 +235,7 @@ const CreateCamp = () => {
         
         {/* Camp days and activities */}
         <div>
-          <h3 className="text-lg font-medium mb-4">Camp Schedule</h3>
+          <h3 className="text-lg font-medium mb-4">{t('camps.schedule')}</h3>
           
           {days.map((day, dayIndex) => (
             <div key={dayIndex} className="mb-6 p-4 border rounded-lg bg-gray-50">
@@ -244,7 +257,7 @@ const CreateCamp = () => {
               
               <div className="form-group">
                 <Label htmlFor={`day-${dayIndex}-date`} className="form-label">
-                  Date <span className="text-red-500">*</span>
+                  {t('camps.date')} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id={`day-${dayIndex}-date`}
@@ -259,7 +272,7 @@ const CreateCamp = () => {
               </div>
               
               <div className="mt-4">
-                <Label className="form-label">Activities <span className="text-red-500">*</span></Label>
+                <Label className="form-label">{t('camps.activities')} <span className="text-red-500">*</span></Label>
                 
                 {day.activities.map((activity, activityIndex) => (
                   <div key={activityIndex} className="flex items-center mb-2">
@@ -267,7 +280,7 @@ const CreateCamp = () => {
                       value={activity}
                       onChange={(e) => handleActivityChange(dayIndex, activityIndex, e.target.value)}
                       className="form-input mr-2"
-                      placeholder={`Activity ${activityIndex + 1}`}
+                      placeholder={`${t('camps.activity')} ${activityIndex + 1}`}
                       required
                     />
                     
@@ -293,7 +306,7 @@ const CreateCamp = () => {
                   className="mt-2"
                 >
                   <Plus size={16} className="mr-1" />
-                  Add Activity
+                  {t('camps.addActivity')}
                 </Button>
               </div>
             </div>
@@ -306,7 +319,7 @@ const CreateCamp = () => {
             onClick={addDay}
           >
             <Plus size={16} className="mr-1" />
-            Add Day
+            {t('camps.addDay')}
           </Button>
         </div>
         
@@ -316,7 +329,7 @@ const CreateCamp = () => {
             variant="outline"
             onClick={() => navigate('/camps')}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           
           <Button 
@@ -324,7 +337,7 @@ const CreateCamp = () => {
             className="bg-camp-primary hover:bg-camp-secondary"
             disabled={loading}
           >
-            {loading ? 'Creating...' : 'Create Camp'}
+            {loading ? t('common.creating') : t('common.create')}
           </Button>
         </div>
       </form>

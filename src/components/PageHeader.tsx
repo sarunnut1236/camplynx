@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, User } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PageHeaderProps {
@@ -17,6 +18,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   // Don't show back button on main screens
   const hideBackByDefault = ['/home', '/camps', '/profile'];
@@ -28,7 +30,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           <button 
             onClick={() => navigate(-1)}
             className="mr-3 text-gray-600"
-            aria-label="Go back"
+            aria-label={t('navigation.goBack')}
           >
             <ArrowLeft size={20} />
           </button>
@@ -41,7 +43,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           {user.profileImage ? (
             <img 
               src={user.profileImage} 
-              alt={user.name}
+              alt={user.firstname}
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (

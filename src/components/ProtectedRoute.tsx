@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/enums/User';
+import { useAuth } from '../contexts/AuthContext';
+import { UserRole } from '../enums/User';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

@@ -120,11 +120,11 @@ html, body {
 
 @layer utilities {
   .page-container {
-    @apply container max-w-lg mx-auto px-4 py-6 pb-20;
+    @apply container max-w-lg mx-auto px-4 py-6 pb-20 bg-white/40 border border-white/20 shadow-xl rounded-lg mt-4;
   }
   
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-6 flex justify-between items-center;
+    @apply fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-sm border-t border-gray-200 py-2 px-6 flex justify-between items-center;
   }
   
   .nav-item {
@@ -148,7 +148,15 @@ html, body {
   }
   
   .camp-card {
-    @apply bg-white rounded-lg shadow-md overflow-hidden mb-6;
+    @apply relative overflow-hidden rounded-lg shadow-md mb-6;
+  }
+  
+  .camp-card::before {
+    @apply content-[''] absolute inset-0 bg-white/50 backdrop-blur-sm -z-10;
+  }
+  
+  .camp-card > * {
+    @apply relative z-10;
   }
   
   .camp-image {
@@ -169,5 +177,31 @@ html, body {
   
   .camp-date {
     @apply text-sm text-gray-500 mb-3;
+  }
+  
+  /* Glass card effect that preserves sharp text */
+  .glass-card {
+    @apply relative overflow-hidden;
+  }
+  
+  .glass-card::before {
+    @apply content-[''] absolute inset-0 bg-white/70 backdrop-blur-sm -z-10;
+  }
+  
+  .glass-card > * {
+    @apply relative z-10;
+  }
+  
+  /* Section card with glass effect - used for profile sections, settings, etc. */
+  .section-card {
+    @apply relative overflow-hidden rounded-lg shadow-md p-6 mb-6;
+  }
+  
+  .section-card::before {
+    @apply content-[''] absolute inset-0 bg-white/80 backdrop-blur-md -z-10;
+  }
+  
+  .section-card > * {
+    @apply relative z-10;
   }
 }

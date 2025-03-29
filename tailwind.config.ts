@@ -109,13 +109,48 @@ export default {
 						transform: 'translateY(0)'
 					}
 				},
+				'blob': {
+					'0%': {
+						transform: 'translate(0px, 0px) scale(1)'
+					},
+					'33%': {
+						transform: 'translate(30px, -50px) scale(1.1)'
+					},
+					'66%': {
+						transform: 'translate(-20px, 20px) scale(0.9)'
+					},
+					'100%': {
+						transform: 'translate(0px, 0px) scale(1)'
+					}
+				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
+				'blob': 'blob 7s infinite'
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		// Add custom plugin for animation delay utility
+		function ({ addUtilities }) {
+			const newUtilities = {
+				'.animation-delay-2000': {
+					'animation-delay': '2s',
+				},
+				'.animation-delay-4000': {
+					'animation-delay': '4s',
+				},
+				'.glass': {
+					'background': 'rgba(255, 255, 255, 0.25)',
+					'backdrop-filter': 'blur(4px)',
+					'-webkit-backdrop-filter': 'blur(4px)',
+					'border': '1px solid rgba(255, 255, 255, 0.18)',
+				}
+			}
+			addUtilities(newUtilities)
+		}
+	],
 } satisfies Config;

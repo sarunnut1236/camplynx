@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { UserRole, Region } from '@/enums/User';
@@ -21,7 +21,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const initialUsers: User[] = [
   {
     id: '3',
-    name: 'เขมิกา',
+    firstname: 'เขมิกา',
     surname: 'รัตน์แสง',
     nickname: 'เฟรม',
     email: 'frame@example.com',
@@ -39,7 +39,7 @@ const initialUsers: User[] = [
   },
   {
     id: '1',
-    name: 'Jane',
+    firstname: 'Jane',
     surname: 'Cooper',
     nickname: 'J',
     email: 'jane@example.com',
@@ -55,7 +55,7 @@ const initialUsers: User[] = [
   },
   {
     id: '2',
-    name: 'John',
+    firstname: 'John',
     surname: 'Smith',
     nickname: 'Johnny',
     email: 'john@example.com',
@@ -71,16 +71,16 @@ const initialUsers: User[] = [
 ];
 
 // Default user for new registrations
-export const createDefaultUser = (email: string, name: string): User => ({
+export const createDefaultUser = (firstname: string, email?: string): User => ({
   id: crypto.randomUUID(),
-  name,
-  email,
-  role: UserRole.GUEST, // Default to lowest permission level
+  firstname,
+  ...(email ? { email } : {}),
+  role: UserRole.GUEST,
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Use a default user instead of null
-  const defaultUser = initialUsers[0];
+  const defaultUser = initialUsers[0] ?? null;
   const [user, setUser] = useState<User | null>(defaultUser);
   // Always authenticated
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -89,14 +89,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Login function - still keeping this for functionality
   const login = (userData: User) => {
-    const foundUser = initialUsers.find(u => u.email === userData.email) || defaultUser;
-    setUser(foundUser);
-
+    // Find the user by email if provided, otherwise by ID
+    const foundUser = userData.email 
+      ? initialUsers.find(u => u.email === userData.email)
+      : initialUsers.find(u => u.id === userData.id);
+    
+    // Default to the first user if not found
+    const userToLogin = foundUser || defaultUser;
+    setUser(userToLogin);
+    
     toast({
       title: "Logged in successfully",
-      description: `Welcome back, ${foundUser.name}!`,
+      description: `Welcome back, ${userToLogin?.firstname || 'User'}!`,
     });
-
+    
     navigate('/home');
   };
 

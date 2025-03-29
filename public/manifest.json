@@ -1,11 +1,11 @@
 {
-  "name": "YNS Backoffice",
-  "short_name": "YNS Backoffice",
-  "description": "YNS Backoffice management system",
+  "name": "Youth For Next Step",
+  "short_name": "Youth NS",
+  "description": "Youth For Next Step management system",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#5A67D8",
+  "theme_color": "#2563eb",
   "icons": [
     {
       "src": "/icon-192x192.png",

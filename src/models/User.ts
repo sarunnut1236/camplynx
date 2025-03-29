@@ -3,7 +3,7 @@ import { Region, UserRole } from "@/enums/User";
 // Define user interface
 export interface User {
     id: string;
-    name?: string;
+    firstname?: string;
     surname?: string;
     nickname?: string;
     email?: string;

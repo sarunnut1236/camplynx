@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Check, AlertCircle } from 'lucide-react';
@@ -10,6 +9,7 @@ import PageHeader from '@/components/PageHeader';
 import { useCamp } from '@/contexts/CampContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslation } from 'react-i18next';
 
 const CampDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +17,7 @@ const CampDetail = () => {
   const { toast } = useToast();
   const { getCampById, registerForCamp, getRegistrationByCampAndUser, updateRegistration } = useCamp();
   const { user } = useAuth();
+  const { t, i18n } = useTranslation();
   
   const camp = getCampById(id || '');
   const registration = user ? getRegistrationByCampAndUser(id || '', user.id) : undefined;
@@ -32,7 +33,7 @@ const CampDetail = () => {
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' });
   };
   
   const handleDayToggle = (dayId: string) => {
@@ -62,7 +63,7 @@ const CampDetail = () => {
     <div className="page-container pb-20">
       <PageHeader title={camp.name} />
       
-      <div className="mb-6">
+      <div className="mb-6 section-card">
         <img 
           src={camp.imageUrl} 
           alt={camp.name}
@@ -88,14 +89,14 @@ const CampDetail = () => {
       
       <Tabs defaultValue="schedule" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="registration">Registration</TabsTrigger>
+          <TabsTrigger value="schedule">{t('camps.schedule')}</TabsTrigger>
+          <TabsTrigger value="registration">{t('camps.registration')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="schedule" className="mt-4">
           <div className="space-y-6">
             {camp.days.map((day) => (
-              <div key={day.id} className="bg-white rounded-lg shadow-sm p-4">
+              <div key={day.id} className="section-card">
                 <h3 className="font-medium mb-2">
                   Day {day.dayNumber}: {formatDate(day.date)}
                 </h3>
@@ -118,8 +119,8 @@ const CampDetail = () => {
         </TabsContent>
         
         <TabsContent value="registration" className="mt-4">
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-            <h3 className="font-medium mb-4">Select days you can attend:</h3>
+          <div className="section-card mb-6">
+            <h3 className="font-medium mb-4">{t('camps.selectDays')}:</h3>
             
             <div className="space-y-3">
               {camp.days.map((day) => (
@@ -129,7 +130,7 @@ const CampDetail = () => {
                 >
                   <Checkbox 
                     id={day.id}
-                    checked={availability[day.id]}
+                    checked={availability[day.id] ?? false}
                     onCheckedChange={() => handleDayToggle(day.id)}
                     className="mr-3"
                   />
@@ -150,9 +151,9 @@ const CampDetail = () => {
             <div className="flex items-start">
               <AlertCircle size={20} className="mr-2 text-camp-primary mt-0.5" />
               <div>
-                <p className="font-medium">Important Information</p>
+                <p className="font-medium">{t('camps.importantInfo')}</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Please indicate which days you can attend. You can update your availability later if your plans change.
+                  {t('camps.attendanceNote')}
                 </p>
               </div>
             </div>
@@ -162,13 +163,13 @@ const CampDetail = () => {
             onClick={handleRegistration}
             className="w-full bg-camp-primary hover:bg-camp-secondary"
           >
-            {registration ? 'Update Availability' : 'Register for Camp'}
+            {registration ? t('camps.updateAvailability') : t('camps.registerForCamp')}
           </Button>
           
           {registration && (
             <div className="mt-4 flex items-center justify-center text-sm text-green-600">
               <Check size={16} className="mr-1" />
-              <span>You are registered for this camp</span>
+              <span>{t('camps.registeredMessage')}</span>
             </div>
           )}
         </TabsContent>
