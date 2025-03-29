@@ -1,35 +1,16 @@
-
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-
-// Define camp day interface
-export interface CampDay {
-  id: string;
-  dayNumber: number;
-  date: string;
-  activities: string[];
-}
-
-// Define camp interface
-export interface Camp {
-  id: string;
-  name: string;
-  description: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  imageUrl: string;
-  days: CampDay[];
-}
-
-// Define registration interface
-export interface Registration {
-  id: string;
-  userId: string;
-  campId: string;
-  dayAvailability: { [dayId: string]: boolean };
-  registrationDate: string;
-}
+import { Camp, Registration } from '@/models';
+import { useTranslation } from 'react-i18next';
+import {
+  getAllCamps,
+  createCamp as createCampProvider,
+  updateCamp as updateCampProvider,
+  deleteCamp as deleteCampProvider,
+  getAllRegistrations,
+  getRegistrationByCampAndUser as getRegistrationByCampAndUserProvider,
+  registerForCamp as registerForCampProvider,
+  updateRegistration as updateRegistrationProvider} from '@/providers/camps';
 
 // Define context interface
 interface CampContextType {
@@ -44,206 +25,206 @@ interface CampContextType {
   getCampById: (id: string) => Camp | undefined;
   getRegistrationById: (id: string) => Registration | undefined;
   getRegistrationByCampAndUser: (campId: string, userId: string) => Registration | undefined;
+  searchCamps: (searchTerm: string) => Camp[];
 }
-
-// Mock data for camps
-const initialCamps: Camp[] = [
-  {
-    id: '1',
-    name: 'Camp Happy New Year 2024',
-    description: 'Celebrate the new year with outdoor activities and fun!',
-    location: 'Pine Forest Retreat',
-    startDate: '2024-01-01',
-    endDate: '2024-01-03',
-    imageUrl: 'https://images.unsplash.com/photo-1496080174650-637e3f22fa03?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    days: [
-      {
-        id: 'd1',
-        dayNumber: 1,
-        date: '2024-01-01',
-        activities: ['Welcome Breakfast', 'Campfire Games']
-      },
-      {
-        id: 'd2',
-        dayNumber: 2,
-        date: '2024-01-02',
-        activities: ['Sunrise Hike', 'Swimming']
-      },
-      {
-        id: 'd3',
-        dayNumber: 3,
-        date: '2024-01-03',
-        activities: ['Nature Walk', 'Farewell Lunch']
-      }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Summer Adventure Camp',
-    description: 'Explore nature and learn outdoor survival skills',
-    location: 'Mountain Valley',
-    startDate: '2024-06-15',
-    endDate: '2024-06-17',
-    imageUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-    days: [
-      {
-        id: 'd4',
-        dayNumber: 1,
-        date: '2024-06-15',
-        activities: ['Campfire Games', 'Night Sky Observation']
-      },
-      {
-        id: 'd5',
-        dayNumber: 2,
-        date: '2024-06-16',
-        activities: ['Arts and Crafts', 'Swimming']
-      },
-      {
-        id: 'd6',
-        dayNumber: 3,
-        date: '2024-06-17',
-        activities: ['Nature Hike', 'Survival Skills Workshop']
-      }
-    ]
-  }
-];
-
-// Initial registrations (empty)
-const initialRegistrations: Registration[] = [];
 
 // Create context
 const CampContext = createContext<CampContextType | null>(null);
 
 export const CampProvider = ({ children }: { children: ReactNode }) => {
-  const [camps, setCamps] = useState<Camp[]>(initialCamps);
-  const [registrations, setRegistrations] = useState<Registration[]>(initialRegistrations);
+  const [camps, setCamps] = useState<Camp[]>([]);
+  const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
-  // Load saved data on mount
+  // Load saved data
   useEffect(() => {
-    const savedCamps = localStorage.getItem('camplynx_camps');
-    const savedRegistrations = localStorage.getItem('camplynx_registrations');
-
-    if (savedCamps) {
-      setCamps(JSON.parse(savedCamps));
-    } else {
-      localStorage.setItem('camplynx_camps', JSON.stringify(initialCamps));
-    }
-
-    if (savedRegistrations) {
-      setRegistrations(JSON.parse(savedRegistrations));
-    }
-  }, []);
-
-  // Save data on change
-  useEffect(() => {
-    localStorage.setItem('camplynx_camps', JSON.stringify(camps));
-  }, [camps]);
-
-  useEffect(() => {
-    localStorage.setItem('camplynx_registrations', JSON.stringify(registrations));
-  }, [registrations]);
-
-  // Create a new camp
-  const createCamp = (campData: Omit<Camp, 'id'>) => {
-    const newCamp = {
-      ...campData,
-      id: `camp-${Date.now()}`
+    const loadData = async () => {
+      try {
+        const [campsData, registrationsData] = await Promise.all([
+          getAllCamps(),
+          getAllRegistrations()
+        ]);
+        
+        setCamps(campsData);
+        setRegistrations(registrationsData);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     
-    setCamps([...camps, newCamp]);
-    
-    toast({
-      title: "Camp created",
-      description: `${newCamp.name} has been created successfully.`,
-    });
+    loadData();
+  }, []);
+
+  // Create a new camp
+  const createCamp = async (campData: Omit<Camp, 'id'>) => {
+    try {
+      const newCamp = await createCampProvider(campData);
+      setCamps(prev => [...prev, newCamp]);
+      
+      toast({
+        title: t('toast.campCreated'),
+        description: t('toast.campCreatedDescription', { name: newCamp.name }),
+      });
+    } catch (error) {
+      console.error("Error creating camp:", error);
+      toast({
+        title: t('toast.error'),
+        description: t('toast.createCampError'),
+        variant: "destructive",
+      });
+    }
   };
 
   // Update an existing camp
-  const updateCamp = (id: string, campData: Partial<Camp>) => {
-    setCamps(camps.map(camp => 
-      camp.id === id ? { ...camp, ...campData } : camp
-    ));
-    
-    toast({
-      title: "Camp updated",
-      description: "The camp has been updated successfully.",
-    });
+  const updateCamp = async (id: string, campData: Partial<Camp>) => {
+    try {
+      const updatedCamp = await updateCampProvider(id, campData);
+      
+      if (updatedCamp) {
+        setCamps(prev => prev.map(camp => 
+          camp.id === id ? updatedCamp : camp
+        ));
+        
+        toast({
+          title: t('toast.campUpdated'),
+          description: t('toast.campUpdatedDescription'),
+        });
+      }
+    } catch (error) {
+      console.error("Error updating camp:", error);
+      toast({
+        title: t('toast.error'),
+        description: t('toast.updateCampError'),
+        variant: "destructive",
+      });
+    }
   };
 
   // Delete a camp
-  const deleteCamp = (id: string) => {
-    setCamps(camps.filter(camp => camp.id !== id));
-    // Also delete any registrations for this camp
-    setRegistrations(registrations.filter(reg => reg.campId !== id));
-    
-    toast({
-      title: "Camp deleted",
-      description: "The camp has been deleted successfully.",
-    });
+  const deleteCamp = async (id: string) => {
+    try {
+      const success = await deleteCampProvider(id);
+      
+      if (success) {
+        setCamps(prev => prev.filter(camp => camp.id !== id));
+        setRegistrations(prev => prev.filter(reg => reg.campId !== id));
+        
+        toast({
+          title: t('toast.campDeleted'),
+          description: t('toast.campDeletedDescription'),
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting camp:", error);
+      toast({
+        title: t('toast.error'),
+        description: t('toast.deleteCampError'),
+        variant: "destructive",
+      });
+    }
   };
 
   // Register for a camp
-  const registerForCamp = (userId: string, campId: string, dayAvailability: { [dayId: string]: boolean }) => {
-    // Check if already registered
-    const existingReg = registrations.find(r => r.userId === userId && r.campId === campId);
-    
-    if (existingReg) {
+  const registerForCamp = async (userId: string, campId: string, dayAvailability: { [dayId: string]: boolean }) => {
+    try {
+      // Check if already registered
+      const existingReg = await getRegistrationByCampAndUserProvider(campId, userId);
+      
+      if (existingReg) {
+        toast({
+          title: t('toast.alreadyRegistered'),
+          description: t('toast.alreadyRegisteredDescription'),
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const newRegistration = await registerForCampProvider(userId, campId, dayAvailability);
+      
+      if (newRegistration) {
+        setRegistrations(prev => [...prev, newRegistration]);
+        
+        toast({
+          title: t('toast.registrationSuccessful'),
+          description: t('toast.registrationSuccessfulDescription'),
+        });
+      }
+    } catch (error) {
+      console.error("Error registering for camp:", error);
       toast({
-        title: "Already registered",
-        description: "You are already registered for this camp.",
+        title: t('toast.error'),
+        description: t('toast.registerCampError'),
         variant: "destructive",
       });
-      return;
     }
-    
-    const newRegistration: Registration = {
-      id: `reg-${Date.now()}`,
-      userId,
-      campId,
-      dayAvailability,
-      registrationDate: new Date().toISOString(),
-    };
-    
-    setRegistrations([...registrations, newRegistration]);
-    
-    toast({
-      title: "Registration successful",
-      description: "You have been registered for the camp.",
-    });
   };
 
   // Update registration
-  const updateRegistration = (id: string, dayAvailability: { [dayId: string]: boolean }) => {
-    setRegistrations(registrations.map(reg => 
-      reg.id === id ? { ...reg, dayAvailability } : reg
-    ));
-    
-    toast({
-      title: "Registration updated",
-      description: "Your availability has been updated successfully.",
-    });
+  const updateRegistration = async (id: string, dayAvailability: { [dayId: string]: boolean }) => {
+    try {
+      const updatedReg = await updateRegistrationProvider(id, dayAvailability);
+      
+      if (updatedReg) {
+        setRegistrations(prev => prev.map(reg => 
+          reg.id === id ? updatedReg : reg
+        ));
+        
+        toast({
+          title: t('toast.registrationUpdated'),
+          description: t('toast.registrationUpdatedDescription'),
+        });
+      }
+    } catch (error) {
+      console.error("Error updating registration:", error);
+      toast({
+        title: t('toast.error'),
+        description: t('toast.updateRegistrationError'),
+        variant: "destructive",
+      });
+    }
   };
 
-  // Get user registrations
+  // Get user registrations - synchronous wrapper around async provider
   const getUserRegistrations = (userId: string) => {
     return registrations.filter(reg => reg.userId === userId);
   };
 
-  // Get camp by ID
+  // Get camp by ID - synchronous wrapper around async provider
   const getCampById = (id: string) => {
     return camps.find(camp => camp.id === id);
   };
 
-  // Get registration by ID
+  // Get registration by ID - synchronous wrapper around async provider
   const getRegistrationById = (id: string) => {
     return registrations.find(reg => reg.id === id);
   };
 
-  // Get registration by camp and user
+  // Get registration by camp and user - synchronous wrapper around async provider
   const getRegistrationByCampAndUser = (campId: string, userId: string) => {
     return registrations.find(reg => reg.campId === campId && reg.userId === userId);
   };
+
+  // Search camps by name, description, or location
+  const searchCamps = (searchTerm: string): Camp[] => {
+    if (!searchTerm.trim()) {
+      return camps; // Return all camps if search term is empty
+    }
+    
+    const term = searchTerm.toLowerCase().trim();
+    return camps.filter(camp => 
+      camp.name.toLowerCase().includes(term) || 
+      camp.description.toLowerCase().includes(term) || 
+      camp.location.toLowerCase().includes(term)
+    );
+  };
+
+  if (loading) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <CampContext.Provider value={{
@@ -257,7 +238,8 @@ export const CampProvider = ({ children }: { children: ReactNode }) => {
       getUserRegistrations,
       getCampById,
       getRegistrationById,
-      getRegistrationByCampAndUser
+      getRegistrationByCampAndUser,
+      searchCamps
     }}>
       {children}
     </CampContext.Provider>

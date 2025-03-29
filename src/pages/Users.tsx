@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, User, Edit, MoreHorizontal } from 'lucide-react';
 import {
   DropdownMenu,
@@ -15,7 +14,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -26,80 +24,95 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import PageHeader from '@/components/PageHeader';
-import { useAuth, UserRole } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole, getUserRoleDisplay } from '@/enums/User';
 import { useToast } from '@/components/ui/use-toast';
-
-// Mock user data for demo
-const mockUsers = [
-  {
-    id: '1',
-    name: 'Jane Cooper',
-    email: 'jane@example.com',
-    role: 'admin' as UserRole,
-    profileImage: '/lovable-uploads/439db2b7-c4d3-4bd9-ab25-68e85d686991.png',
-  },
-  {
-    id: '2',
-    name: 'John Smith',
-    email: 'john@example.com',
-    role: 'joiner' as UserRole,
-  },
-  {
-    id: '3',
-    name: 'Emily Davis',
-    email: 'emily@example.com',
-    role: 'joiner' as UserRole,
-  },
-  {
-    id: '4',
-    name: 'Michael Brown',
-    email: 'michael@example.com',
-    role: 'joiner' as UserRole,
-  },
-];
+import { useTranslation } from 'react-i18next';
+import { getAllUsers, updateUser } from '@/providers/users';
+import { User as UserType } from '@/models/User';
 
 const Users = () => {
   const { hasPermission, user: currentUser } = useAuth();
   const { toast } = useToast();
-  const [users, setUsers] = useState(mockUsers);
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
+  const { t } = useTranslation();
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<UserRole | ''>('');
+  const [loading, setLoading] = useState(true);
+  
+  // Load users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getAllUsers();
+        setUsers(usersData);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load users. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUsers();
+  }, [toast]);
   
   // Check if user has admin permission
-  if (!hasPermission('admin')) {
-    return <div className="p-6">Unauthorized access</div>;
+  if (!hasPermission(UserRole.ADMIN)) {
+    return <div className="p-6">{t('users.unauthorized')}</div>;
   }
   
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    setUsers(prev => 
-      prev.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      )
-    );
+  if (loading) {
+    return <div className="p-6">{t('common.loading')}</div>;
+  }
+  
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+    try {
+      const updatedUser = await updateUser(userId, { role: newRole });
+      
+      if (updatedUser) {
+        setUsers(prev => 
+          prev.map(user => 
+            user.id === userId ? { ...user, role: newRole } : user
+          )
+        );
+        
+        toast({
+          title: t('users.roleUpdated'),
+          description: t('users.roleUpdatedDescription', { role: getUserRoleDisplay(newRole) }),
+        });
+      }
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role. Please try again.",
+        variant: "destructive",
+      });
+    }
     
     setDialogOpen(false);
     setSelectedUser(null);
-    
-    toast({
-      title: "Role updated",
-      description: `User role has been updated to ${newRole}.`,
-    });
   };
   
-  const openRoleDialog = (user: typeof mockUsers[0]) => {
+  const openRoleDialog = (user: UserType) => {
     setSelectedUser(user);
     setNewRole(user.role);
     setDialogOpen(true);
   };
 
   return (
-    <div className="page-container pb-20">
-      <PageHeader title="Manage Users" />
+    <div className="page-container pb-20 min-h-screen">
+      <PageHeader title={t('users.manageUsers')} />
       
       <div className="mb-6">
         <p className="text-gray-600">
-          As an admin, you can manage user roles and permissions.
+          {t('users.adminDescription')}
         </p>
       </div>
       
@@ -113,7 +126,7 @@ const Users = () => {
               {user.profileImage ? (
                 <img 
                   src={user.profileImage} 
-                  alt={user.name}
+                  alt={user.firstname}
                   className="w-10 h-10 rounded-full object-cover mr-3"
                 />
               ) : (
@@ -123,11 +136,11 @@ const Users = () => {
               )}
               
               <div>
-                <p className="font-medium">{user.name}</p>
+                <p className="font-medium">{user.firstname}</p>
                 <p className="text-sm text-gray-500">{user.email}</p>
                 <div className="flex items-center mt-1">
                   <Shield size={14} className="text-camp-primary mr-1" />
-                  <span className="text-xs font-medium capitalize">{user.role}</span>
+                  <span className="text-xs font-medium">{getUserRoleDisplay(user.role)}</span>
                 </div>
               </div>
             </div>
@@ -143,7 +156,7 @@ const Users = () => {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => openRoleDialog(user)}>
                     <Edit size={14} className="mr-2" />
-                    Change Role
+                    {t('users.changeRole')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -156,25 +169,25 @@ const Users = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Change User Role</DialogTitle>
+            <DialogTitle>{t('users.changeRoleTitle')}</DialogTitle>
             <DialogDescription>
-              Update the role for {selectedUser?.name}
+              {t('users.changeRoleDescription', { name: selectedUser?.firstname })}
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
-            <Label htmlFor="role" className="mb-2 block">Select Role</Label>
+            <Label htmlFor="role" className="mb-2 block">{t('users.selectRole')}</Label>
             <Select 
               value={newRole} 
               onValueChange={(value) => setNewRole(value as UserRole)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select role" />
+                <SelectValue placeholder={t('users.selectRolePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="joiner">Joiner</SelectItem>
-                <SelectItem value="guest">Guest</SelectItem>
+                <SelectItem value={UserRole.ADMIN}>{t('roles.admin')}</SelectItem>
+                <SelectItem value={UserRole.JOINER}>{t('roles.joiner')}</SelectItem>
+                <SelectItem value={UserRole.GUEST}>{t('roles.guest')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -184,14 +197,14 @@ const Users = () => {
               variant="outline" 
               onClick={() => setDialogOpen(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button 
               onClick={() => selectedUser && newRole && handleRoleChange(selectedUser.id, newRole as UserRole)}
               disabled={!newRole || newRole === selectedUser?.role}
               className="bg-camp-primary hover:bg-camp-secondary"
             >
-              Save Changes
+              {t('common.saveChanges')}
             </Button>
           </DialogFooter>
         </DialogContent>

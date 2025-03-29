@@ -1,39 +1,57 @@
-
-import React, { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Check, AlertCircle } from 'lucide-react';
+import { Calendar, MapPin, Clock, Check, AlertCircle, Edit, Trash, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import PageHeader from '@/components/PageHeader';
 import { useCamp } from '@/contexts/CampContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
+import { useTranslation } from 'react-i18next';
+import { UserRole } from '@/enums/User';
 
 const CampDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { getCampById, registerForCamp, getRegistrationByCampAndUser, updateRegistration } = useCamp();
-  const { user } = useAuth();
+  const { getCampById, registerForCamp, getRegistrationByCampAndUser, updateRegistration, deleteCamp } = useCamp();
+  const { user, hasPermission } = useAuth();
+  const { t, i18n } = useTranslation();
   
   const camp = getCampById(id || '');
   const registration = user ? getRegistrationByCampAndUser(id || '', user.id) : undefined;
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const [availability, setAvailability] = useState<{ [dayId: string]: boolean }>(
     registration?.dayAvailability || 
     (camp?.days.reduce((acc, day) => ({ ...acc, [day.id]: false }), {}) || {})
   );
   
-  if (!camp) {
-    return <div className="p-6">Camp not found</div>;
-  }
+  // Check if user is admin
+  const isAdmin = hasPermission(UserRole.ADMIN);
   
-  const formatDate = (dateString: string) => {
+  // Format date function that depends on i18n
+  const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-  };
+    return date.toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' });
+  }, [i18n.language]);
+  
+  // Early return if camp not found
+  if (!camp) {
+    return <div className="p-6">{t('camps.notFound')}</div>;
+  }
   
   const handleDayToggle = (dayId: string) => {
     setAvailability(prev => ({
@@ -49,23 +67,34 @@ const CampDetail = () => {
       // Update existing registration
       updateRegistration(registration.id, availability);
       toast({
-        title: "Availability updated",
-        description: "Your availability for this camp has been updated.",
+        title: t('toast.availabilityUpdated'),
+        description: t('toast.availabilityUpdatedDescription'),
       });
     } else {
       // Create new registration
       registerForCamp(user.id, camp.id, availability);
     }
   };
+  
+  const handleDelete = () => {
+    if (id) {
+      deleteCamp(id);
+      toast({
+        title: t('toast.campDeleted'),
+        description: t('toast.campDeletedDescription'),
+      });
+      navigate('/camps');
+    }
+  };
 
   return (
-    <div className="page-container pb-20">
+    <div className="page-container pb-20 min-h-screen">
       <PageHeader title={camp.name} />
       
-      <div className="mb-6">
+      <div className="mb-6 section-card">
         <img 
           src={camp.imageUrl} 
-          alt={camp.name}
+          alt={t('camps.campImageAlt', { name: camp.name })}
           className="w-full h-48 object-cover rounded-lg mb-4"
         />
         
@@ -83,21 +112,54 @@ const CampDetail = () => {
           </div>
           
           <p className="text-gray-700 mt-2">{camp.description}</p>
+          
+          {/* Admin Actions */}
+          {isAdmin && (
+            <div className="mt-4 flex gap-2 flex-wrap">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={() => navigate(`/camps/${id}/participants`)}
+              >
+                <Users size={16} />
+                {t('camps.viewParticipants')}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={() => navigate(`/camps/${id}/edit`)}
+              >
+                <Edit size={16} />
+                {t('camps.edit')}
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash size={16} />
+                {t('camps.delete')}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       
       <Tabs defaultValue="schedule" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="registration">Registration</TabsTrigger>
+          <TabsTrigger value="schedule">{t('camps.schedule')}</TabsTrigger>
+          <TabsTrigger value="registration">{t('camps.registration')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="schedule" className="mt-4">
           <div className="space-y-6">
             {camp.days.map((day) => (
-              <div key={day.id} className="bg-white rounded-lg shadow-sm p-4">
+              <div key={day.id} className="section-card">
                 <h3 className="font-medium mb-2">
-                  Day {day.dayNumber}: {formatDate(day.date)}
+                  {t('camps.dayNumber', { number: day.dayNumber })}: {formatDate(day.date)}
                 </h3>
                 
                 <Separator className="my-3" />
@@ -118,8 +180,8 @@ const CampDetail = () => {
         </TabsContent>
         
         <TabsContent value="registration" className="mt-4">
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-            <h3 className="font-medium mb-4">Select days you can attend:</h3>
+          <div className="section-card mb-6">
+            <h3 className="font-medium mb-4">{t('camps.selectDays')}:</h3>
             
             <div className="space-y-3">
               {camp.days.map((day) => (
@@ -129,16 +191,16 @@ const CampDetail = () => {
                 >
                   <Checkbox 
                     id={day.id}
-                    checked={availability[day.id]}
+                    checked={availability[day.id] ?? false}
                     onCheckedChange={() => handleDayToggle(day.id)}
                     className="mr-3"
                   />
                   <div>
                     <label htmlFor={day.id} className="font-medium cursor-pointer">
-                      Day {day.dayNumber}: {formatDate(day.date)}
+                      {t('camps.dayNumber', { number: day.dayNumber })}: {formatDate(day.date)}
                     </label>
                     <p className="text-sm text-gray-500">
-                      {day.activities.length} {day.activities.length === 1 ? 'activity' : 'activities'} planned
+                      {day.activities.length} {t(day.activities.length === 1 ? 'camps.activity' : 'camps.activities')} {t('camps.planned')}
                     </p>
                   </div>
                 </div>
@@ -150,9 +212,9 @@ const CampDetail = () => {
             <div className="flex items-start">
               <AlertCircle size={20} className="mr-2 text-camp-primary mt-0.5" />
               <div>
-                <p className="font-medium">Important Information</p>
+                <p className="font-medium">{t('camps.importantInfo')}</p>
                 <p className="text-sm text-gray-600 mt-1">
-                  Please indicate which days you can attend. You can update your availability later if your plans change.
+                  {t('camps.attendanceNote')}
                 </p>
               </div>
             </div>
@@ -162,17 +224,35 @@ const CampDetail = () => {
             onClick={handleRegistration}
             className="w-full bg-camp-primary hover:bg-camp-secondary"
           >
-            {registration ? 'Update Availability' : 'Register for Camp'}
+            {registration ? t('camps.updateAvailability') : t('camps.registerForCamp')}
           </Button>
           
           {registration && (
             <div className="mt-4 flex items-center justify-center text-sm text-green-600">
               <Check size={16} className="mr-1" />
-              <span>You are registered for this camp</span>
+              <span>{t('camps.registeredMessage')}</span>
             </div>
           )}
         </TabsContent>
       </Tabs>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('camps.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('camps.deleteConfirmMessage')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+              {t('common.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

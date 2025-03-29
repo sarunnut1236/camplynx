@@ -1,7 +1,141 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Font classes */
+.kanit-thin {
+  font-family: "Kanit", sans-serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.kanit-extralight {
+  font-family: "Kanit", sans-serif;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.kanit-light {
+  font-family: "Kanit", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.kanit-regular {
+  font-family: "Kanit", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.kanit-medium {
+  font-family: "Kanit", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.kanit-semibold {
+  font-family: "Kanit", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.kanit-bold {
+  font-family: "Kanit", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.kanit-extrabold {
+  font-family: "Kanit", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.kanit-black {
+  font-family: "Kanit", sans-serif;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.kanit-thin-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.kanit-extralight-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.kanit-light-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.kanit-regular-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.kanit-medium-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.kanit-semibold-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.kanit-bold-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.kanit-extrabold-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+}
+
+.kanit-black-italic {
+  font-family: "Kanit", sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+/* Mobile App Behavior */
+html, body {
+  overscroll-behavior: none;
+  position: fixed;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  font-family: "Kanit", sans-serif;
+}
+
+#root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
 
 @layer base {
   :root {
@@ -91,20 +225,21 @@
 
   body {
     @apply bg-camp-background text-foreground;
+    font-family: "Kanit", sans-serif;
   }
 }
 
 @layer utilities {
   .page-container {
-    @apply container max-w-lg mx-auto px-4 py-6;
+    @apply container max-w-lg mx-auto px-4 py-6 pb-20 bg-white/40 border border-white/20 shadow-xl rounded-lg mt-4 min-h-screen;
   }
   
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-6 flex justify-between items-center;
+    @apply fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-sm border-t border-gray-200 py-2 px-6 flex justify-between items-center;
   }
   
   .nav-item {
-    @apply flex flex-col items-center justify-center text-gray-500;
+    @apply flex flex-col items-center justify-center text-gray-500 w-full;
   }
   
   .nav-item.active {
@@ -124,7 +259,15 @@
   }
   
   .camp-card {
-    @apply bg-white rounded-lg shadow-md overflow-hidden mb-6;
+    @apply relative overflow-hidden rounded-lg shadow-md mb-6;
+  }
+  
+  .camp-card::before {
+    @apply content-[''] absolute inset-0 bg-white/50 backdrop-blur-sm -z-10;
+  }
+  
+  .camp-card > * {
+    @apply relative z-10;
   }
   
   .camp-image {
@@ -145,5 +288,31 @@
   
   .camp-date {
     @apply text-sm text-gray-500 mb-3;
+  }
+  
+  /* Glass card effect that preserves sharp text */
+  .glass-card {
+    @apply relative overflow-hidden;
+  }
+  
+  .glass-card::before {
+    @apply content-[''] absolute inset-0 bg-white/70 backdrop-blur-sm -z-10;
+  }
+  
+  .glass-card > * {
+    @apply relative z-10;
+  }
+  
+  /* Section card with glass effect - used for profile sections, settings, etc. */
+  .section-card {
+    @apply relative overflow-hidden rounded-lg shadow-md p-6 mb-6;
+  }
+  
+  .section-card::before {
+    @apply content-[''] absolute inset-0 bg-white/80 backdrop-blur-md -z-10;
+  }
+  
+  .section-card > * {
+    @apply relative z-10;
   }
 }

@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Rules when developing code
+
+- When you create a new file, always write testcase for it if it is in these folders: /src/contexts, /src/hooks, /src/lib, /src/models, /src/pages, /src/providers, /src/utils
+- When you edit the existing file, always run ```npm run test``` to validate that your new code doesn't break current logic. If you broke it, try to fix it until it passes.
+- After finished editing code and all test passes, always run ```npm run lint:fix``` to do some eslint fix.
+- Always look at problems in console, and fix it immediately.
+
+# Folder organization purpose
+- components -> contain UI dumb components, e.g. ChadCN UI components, Custom component
+- Contexts -> react custom contexts
+- hooks -> react custom hooks
+- lib -> some knid of library
+- models -> schema for data, e.g. interface, types, dtos
+- pages -> page which renders UI and responsible for logic in the page
+- providers -> handle data-related logic. and linked with api services or backend
+- utils -> utilities classes

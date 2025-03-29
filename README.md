@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# YNS Backoffice Management System
 
 ## Project info
 
