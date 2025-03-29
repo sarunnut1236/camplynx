@@ -2,7 +2,7 @@ import liff from "@line/liff";
 import { LiffProfile, LiffData } from "@/models/Liff";
 
 // Get LIFF ID from environment variables
-const VITE_LIFF_ID = import.meta.env.VITE_LIFF_ID;
+const LIFF_ID = import.meta.env.LIFF_ID;
 
 // Define a function to initialize LIFF
 export const initializeLiff = async (): Promise<LiffData> => {
@@ -14,18 +14,18 @@ export const initializeLiff = async (): Promise<LiffData> => {
       mode: import.meta.env.MODE
     });
     
-    if (!VITE_LIFF_ID) {
+    if (!LIFF_ID) {
       console.error('❌ LIFF ID is missing in environment variables');
-      throw new Error("LIFF ID is not defined. Make sure VITE_LIFF_ID is set in your environment variables.");
+      throw new Error("LIFF ID is not defined. Make sure LIFF_ID is set in your environment variables.");
     }
     
-    console.log("📋 Initializing LIFF with ID:", VITE_LIFF_ID);
+    console.log("📋 Initializing LIFF with ID:", LIFF_ID);
     
     // Capture initialization time for performance logging
     const startTime = performance.now();
     
     await liff.init({
-      liffId: VITE_LIFF_ID,
+      liffId: LIFF_ID,
       withLoginOnExternalBrowser: true,
     });
     
