@@ -15,7 +15,7 @@ This project uses environment variables for configuration. To set up your local 
 
 2. Update the values in the `.env` file with your actual configuration:
    ```
-   LIFF_ID=your_actual_LIFF_ID
+   VITE_LIFF_ID=your_actual_VITE_LIFF_ID
    ```
 
 3. For LINE LIFF integration, you need to:
