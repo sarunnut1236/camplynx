@@ -13,7 +13,7 @@ const BottomNavigation = () => {
   }
 
   return (
-    <div className="bottom-nav">
+    <div className="bottom-nav z-50">
       <Link 
         to="/home" 
         className={cn("nav-item", location.pathname === '/home' && "active")}

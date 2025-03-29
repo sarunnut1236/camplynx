@@ -4,7 +4,7 @@ import './index.css'
 import { setupMobileAppBehavior } from './lib/utils'
 
 // Import i18n
-import './i18n';
+import './lib/i18n';
 
 // Apply mobile app behaviors
 setupMobileAppBehavior();

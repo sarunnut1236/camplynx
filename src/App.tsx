@@ -35,8 +35,8 @@ const App = () => (
               <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-camp-light relative">
                 {/* Background decoration elements */}
                 <div className="absolute top-20 left-10 w-40 h-40 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
-                <div className="absolute top-40 right-10 w-60 h-60 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-                <div className="absolute bottom-40 left-20 w-60 h-60 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+                <div className="absolute top-40 right-10 w-60 h-60 bg-yellow-100 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
+                <div className="absolute bottom-40 left-20 w-60 h-60 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
                 
                 {/* Main content with glass effect */}
                 <div className="relative min-h-screen">

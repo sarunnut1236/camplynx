@@ -13,9 +13,9 @@ export function preventDefaultTouchMove(element: HTMLElement | null): () => void
   
   const preventTouchMove = (e: TouchEvent) => {
     // Only prevent horizontal scrolling
-    const touchStartX = e.touches[0].clientX;
-    const touchMoveX = e.changedTouches[0].clientX;
-    const deltaX = Math.abs(touchMoveX - touchStartX);
+    const touchStartX = e.touches[0]?.clientX ?? 0;
+    const touchMoveX = e.changedTouches[0]?.clientX ?? 0;
+    const deltaX = Math.abs(touchMoveX ?? 0 - touchStartX ?? 0);
     
     if (deltaX > 10) { // Only prevent if horizontal movement is significant
       e.preventDefault();

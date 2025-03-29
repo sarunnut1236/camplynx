@@ -11,6 +11,7 @@ i18n
   // Pass the i18n instance to react-i18next
   .use(initReactI18next)
   .init({
+    lng: 'en',
     fallbackLng: 'en',
     debug: import.meta.env.DEV,
     

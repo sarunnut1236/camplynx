@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, User, Edit, MoreHorizontal } from 'lucide-react';
 import {
   DropdownMenu,
@@ -28,71 +28,79 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserRole, getUserRoleDisplay } from '@/enums/User';
 import { useToast } from '@/components/ui/use-toast';
 import { useTranslation } from 'react-i18next';
-
-// Mock user data for demo
-const mockUsers = [
-  {
-    id: '1',
-    firstname: 'Jane',
-    surname: 'Cooper',
-    email: 'jane@example.com',
-    role: UserRole.ADMIN,
-    profileImage: '/lovable-uploads/439db2b7-c4d3-4bd9-ab25-68e85d686991.png',
-  },
-  {
-    id: '2',
-    firstname: 'John',
-    surname: 'Smith',
-    email: 'john@example.com',
-    role: UserRole.JOINER,
-  },
-  {
-    id: '3',
-    firstname: 'Emily',
-    surname: 'Davis',
-    email: 'emily@example.com',
-    role: UserRole.JOINER,
-  },
-  {
-    id: '4',
-    firstname: 'Michael',
-    surname: 'Brown',
-    email: 'michael@example.com',
-    role: UserRole.JOINER,
-  },
-];
+import { getAllUsers, updateUser } from '@/providers/users';
+import { User as UserType } from '@/models/User';
 
 const Users = () => {
   const { hasPermission, user: currentUser } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [users, setUsers] = useState(mockUsers);
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newRole, setNewRole] = useState<UserRole | ''>('');
+  const [loading, setLoading] = useState(true);
+  
+  // Load users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getAllUsers();
+        setUsers(usersData);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load users. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUsers();
+  }, [toast]);
   
   // Check if user has admin permission
   if (!hasPermission(UserRole.ADMIN)) {
     return <div className="p-6">{t('users.unauthorized')}</div>;
   }
   
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    setUsers(prev => 
-      prev.map(user => 
-        user.id === userId ? { ...user, role: newRole } : user
-      )
-    );
+  if (loading) {
+    return <div className="p-6">{t('common.loading')}</div>;
+  }
+  
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+    try {
+      const updatedUser = await updateUser(userId, { role: newRole });
+      
+      if (updatedUser) {
+        setUsers(prev => 
+          prev.map(user => 
+            user.id === userId ? { ...user, role: newRole } : user
+          )
+        );
+        
+        toast({
+          title: t('users.roleUpdated'),
+          description: t('users.roleUpdatedDescription', { role: getUserRoleDisplay(newRole) }),
+        });
+      }
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update user role. Please try again.",
+        variant: "destructive",
+      });
+    }
     
     setDialogOpen(false);
     setSelectedUser(null);
-    
-    toast({
-      title: t('users.roleUpdated'),
-      description: t('users.roleUpdatedDescription', { role: getUserRoleDisplay(newRole) }),
-    });
   };
   
-  const openRoleDialog = (user: typeof mockUsers[0]) => {
+  const openRoleDialog = (user: UserType) => {
     setSelectedUser(user);
     setNewRole(user.role);
     setDialogOpen(true);
