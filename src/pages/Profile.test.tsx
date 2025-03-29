@@ -71,6 +71,28 @@ vi.mock('@/contexts/LanguageContext', () => ({
   })
 }));
 
+// Mock useLiff hook
+const mockLiffState = {
+  isLiffInitialized: true,
+  isLoggedIn: false,
+  isInClient: false,
+  profile: null,
+  os: null,
+  error: null,
+  login: vi.fn(),
+  logout: vi.fn(),
+  refreshProfile: vi.fn()
+};
+
+vi.mock('@/contexts/LiffContext', () => ({
+  useLiff: () => mockLiffState
+}));
+
+// Mock LiffProfile component
+vi.mock('@/components/LiffProfile', () => ({
+  default: () => <div data-testid="liff-profile">LINE Profile Component</div>
+}));
+
 // Create a custom render function for this test
 function customRender(ui: React.ReactElement) {
   return render(
@@ -129,5 +151,32 @@ describe('Profile', () => {
     customRender(<Profile />);
     
     expect(screen.getByText('Edit')).toBeInTheDocument();
+  });
+  
+  it('renders LINE Profile section when LIFF is initialized', () => {
+    customRender(<Profile />);
+    
+    expect(screen.getByText('LINE Profile')).toBeInTheDocument();
+    expect(screen.getByTestId('liff-profile')).toBeInTheDocument();
+  });
+  
+  it('shows login button when not logged in to LINE', () => {
+    mockLiffState.isLoggedIn = false;
+    customRender(<Profile />);
+    
+    expect(screen.getByText('Login with LINE (Test)')).toBeInTheDocument();
+    expect(screen.queryByText('Logout from LINE (Test)')).not.toBeInTheDocument();
+  });
+  
+  it('shows logout button when logged in to LINE', () => {
+    // Override for this test
+    mockLiffState.isLoggedIn = true;
+    customRender(<Profile />);
+    
+    expect(screen.getByText('Logout from LINE (Test)')).toBeInTheDocument();
+    expect(screen.queryByText('Login with LINE (Test)')).not.toBeInTheDocument();
+    
+    // Reset for other tests
+    mockLiffState.isLoggedIn = false;
   });
 }); 

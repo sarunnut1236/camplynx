@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Edit, User as UserIcon, Mail, Phone, Calendar, MapPin, Gift, MessageCircle, Utensils, Stethoscope, Globe } from 'lucide-react';
+import { Edit, User as UserIcon, Mail, Phone, Calendar, MapPin, Gift, MessageCircle, Utensils, Stethoscope, Globe, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,11 +8,25 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { UserRole, getUserRoleDisplay } from '@/enums/User';
+import LiffProfile from '@/components/LiffProfile';
+import { useLiff } from '@/contexts/LiffContext';
+import { useEffect } from 'react';
 
 const Profile = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { language, changeLanguage } = useLanguage();
+  const { isLiffInitialized, isLoggedIn, profile, login, logout } = useLiff();
+  
+  // Add logging when the profile component mounts or updates
+  useEffect(() => {
+    console.log('====== Profile Page Data ======');
+    console.log('Auth User:', user);
+    console.log('LIFF Initialized:', isLiffInitialized);
+    console.log('LIFF Logged In:', isLoggedIn);
+    console.log('LIFF Profile Data:', profile);
+    console.log('=============================');
+  }, [user, isLiffInitialized, isLoggedIn, profile]);
   
   if (!user) {
     return <div>Loading profile...</div>;
@@ -167,6 +181,33 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      
+      {/* LINE Profile */}
+      {isLiffInitialized && (
+        <div className="section-card">
+          <h3 className="text-lg font-medium border-b pb-2 mb-4">LINE Profile</h3>
+          <LiffProfile />
+          
+          {/* Logout button for testing */}
+          {!isLoggedIn ? (
+            <Button 
+              className="w-full mt-4" 
+              onClick={login}
+            >
+              Login with LINE (Test)
+            </Button>
+          ) : (
+            <Button 
+              variant="destructive" 
+              className="w-full mt-4 flex items-center justify-center" 
+              onClick={logout}
+            >
+              <LogOut size={16} className="mr-2" />
+              Logout from LINE (Test)
+            </Button>
+          )}
+        </div>
+      )}
       
       {/* Role information */}
       <div className="section-card">
