@@ -10,7 +10,8 @@
     "camps": "Camps",
     "users": "Users",
     "profile": "Profile",
-    "goBack": "Back"
+    "goBack": "Back",
+    "viewProfile": "View your profile"
   },
   "auth": {
     "login": "Login",
