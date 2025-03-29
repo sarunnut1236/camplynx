@@ -8,11 +8,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { UserRole, getUserRoleDisplay } from '@/enums/User';
+import { useLiff } from '@/contexts/LiffContext';
 
 const Profile = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { language, changeLanguage } = useLanguage();
+  const { isLiffInitialized, profile } = useLiff();
   
   if (!user) {
     return <div>Loading profile...</div>;
@@ -29,9 +31,16 @@ const Profile = () => {
         showBackButton={false}
       />
       
+      {/* Profile Picture Section */}
       <div className="section-card">
-        <div className="flex flex-col items-center mb-6">
-          {user.profileImage ? (
+        <div className="flex flex-col items-center mb-4">
+          {profile?.pictureUrl ? (
+            <img 
+              src={profile.pictureUrl} 
+              alt={profile.displayName || `${user.firstname} ${user.surname}`}
+              className="w-24 h-24 rounded-full object-cover mb-3"
+            />
+          ) : user.profileImage ? (
             <img 
               src={user.profileImage} 
               alt={`${user.firstname} ${user.surname}`}
@@ -42,129 +51,138 @@ const Profile = () => {
               <UserIcon size={36} className="text-camp-primary" />
             </div>
           )}
-          <h2 className="text-xl font-semibold">{user.firstname} {user.surname}</h2>
-          {user.nickname && <p className="text-gray-600">"{user.nickname}"</p>}
-          {user.title && <p className="text-gray-600">{user.title}</p>}
-          {user.bio && <p className="text-sm text-gray-500 text-center mt-2">{user.bio}</p>}
+
+          {/* Display LINE displayName if available */}
+          {profile?.displayName && (
+            <p className="text-xl text-gray-800 font-semibold mb-1">{profile.displayName}</p>
+          )}
+          
+          {/* Display user's name if no LINE profile */}
+          {!profile?.displayName && (
+            <p className="text-xl text-gray-800 font-semibold mb-1">{user.firstname} {user.surname}</p>
+          )}
+          {user.title && <p className="text-gray-500 text-sm mb-1">{user.title}</p>}
+          {user.bio && <p className="text-xs text-gray-500 text-center mt-1 max-w-xs">{user.bio}</p>}
         </div>
+      </div>
+      
+      {/* Personal Details Section */}
+      <div className="section-card">
+        <h3 className="text-lg font-medium border-b pb-2 mb-4">{t('profile.details')}</h3>
         
         <div className="space-y-4">
-          <h3 className="text-lg font-medium border-b pb-2 mb-4">{t('profile.details')}</h3>
-          
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">{t('profile.fullName')}</p>
-                <div className="flex items-center">
-                  <UserIcon size={16} className="text-gray-400 mr-2" />
-                  <p>{user.firstname} {user.surname}</p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">{t('profile.fullName')}</p>
+              <div className="flex items-center">
+                <UserIcon size={16} className="text-gray-400 mr-2" />
+                <p>{user.firstname} {user.surname}</p>
               </div>
-              
-              {user.nickname && (
-                <div>
-                  <p className="text-sm text-gray-500">{t('profile.nickname')}</p>
-                  <p>{user.nickname}</p>
-                </div>
-              )}
-              
-              {user.email && (
-                <div>
-                  <p className="text-sm text-gray-500">{t('profile.email')}</p>
-                  <div className="flex items-center">
-                    <Mail size={16} className="text-gray-400 mr-2" />
-                    <p>{user.email}</p>
-                  </div>
-                </div>
-              )}
-              
-              {user.phone && (
-                <div>
-                  <p className="text-sm text-gray-500">{t('profile.phone')}</p>
-                  <div className="flex items-center">
-                    <Phone size={16} className="text-gray-400 mr-2" />
-                    <p>{user.phone}</p>
-                  </div>
-                </div>
-              )}
-              
-              {user.region && (
-                <div>
-                  <p className="text-sm text-gray-500">{t('profile.region')}</p>
-                  <div className="flex items-center">
-                    <MapPin size={16} className="text-gray-400 mr-2" />
-                    <p>{user.region}</p>
-                  </div>
-                </div>
-              )}
-              
-              {user.joinedAt && (
-                <div>
-                  <p className="text-sm text-gray-500">{t('profile.joinedDate')}</p>
-                  <div className="flex items-center">
-                    <Calendar size={16} className="text-gray-400 mr-2" />
-                    <p>{format(user.joinedAt, 'PPP')}</p>
-                  </div>
-                </div>
-              )}
-              
-              {user.birthdate && (
-                <div>
-                  <p className="text-sm text-gray-500">{t('profile.birthdate')}</p>
-                  <div className="flex items-center">
-                    <Gift size={16} className="text-gray-400 mr-2" />
-                    <p>{format(user.birthdate, 'PPP')}</p>
-                  </div>
-                </div>
-              )}
-              
-              {user.lineId && (
-                <div>
-                  <p className="text-sm text-gray-500">{t('profile.lineId')}</p>
-                  <div className="flex items-center">
-                    <MessageCircle size={16} className="text-gray-400 mr-2" />
-                    <p>{user.lineId}</p>
-                  </div>
-                </div>
-              )}
             </div>
             
-            {(user.foodAllergy || user.personalMedicalCondition) && (
-              <div className="mt-4 pt-4 border-t">
-                <h4 className="text-md font-medium mb-3">{t('profile.healthInfo')}</h4>
-                <div className="grid grid-cols-1 gap-4">
-                  {user.foodAllergy && (
-                    <div>
-                      <p className="text-sm text-gray-500">{t('profile.foodAllergy')}</p>
-                      <div className="flex items-start">
-                        <Utensils size={16} className="text-gray-400 mr-2 mt-1" />
-                        <p>{user.foodAllergy}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {user.personalMedicalCondition && (
-                    <div>
-                      <p className="text-sm text-gray-500">{t('profile.medicalCondition')}</p>
-                      <div className="flex items-start">
-                        <Stethoscope size={16} className="text-gray-400 mr-2 mt-1" />
-                        <p>{user.personalMedicalCondition}</p>
-                      </div>
-                    </div>
-                  )}
+            {user.nickname && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.nickname')}</p>
+                <p>{user.nickname}</p>
+              </div>
+            )}
+            
+            {user.email && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.email')}</p>
+                <div className="flex items-center">
+                  <Mail size={16} className="text-gray-400 mr-2" />
+                  <p>{user.email}</p>
+                </div>
+              </div>
+            )}
+            
+            {user.phone && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.phone')}</p>
+                <div className="flex items-center">
+                  <Phone size={16} className="text-gray-400 mr-2" />
+                  <p>{user.phone}</p>
+                </div>
+              </div>
+            )}
+            
+            {user.region && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.region')}</p>
+                <div className="flex items-center">
+                  <MapPin size={16} className="text-gray-400 mr-2" />
+                  <p>{user.region}</p>
+                </div>
+              </div>
+            )}
+            
+            {user.joinedAt && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.joinedDate')}</p>
+                <div className="flex items-center">
+                  <Calendar size={16} className="text-gray-400 mr-2" />
+                  <p>{format(user.joinedAt, 'MMMM, y')}</p>
+                </div>
+              </div>
+            )}
+            
+            {user.birthdate && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.birthdate')}</p>
+                <div className="flex items-center">
+                  <Gift size={16} className="text-gray-400 mr-2" />
+                  <p>{format(user.birthdate, 'PPP')}</p>
+                </div>
+              </div>
+            )}
+            
+            {user.lineId && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.lineId')}</p>
+                <div className="flex items-center">
+                  <MessageCircle size={16} className="text-gray-400 mr-2" />
+                  <p>{user.lineId}</p>
                 </div>
               </div>
             )}
           </div>
           
-          <div className="flex justify-between pt-4">
-            <Link to="/profile/edit">
-              <Button variant="outline" className="flex items-center">
-                <Edit size={16} className="mr-2" />
-                {t('profile.edit')}
-              </Button>
-            </Link>
-          </div>
+          {(user.foodAllergy || user.personalMedicalCondition) && (
+            <div className="mt-4 pt-4 border-t">
+              <h4 className="text-md font-medium mb-3">{t('profile.healthInfo')}</h4>
+              <div className="grid grid-cols-1 gap-4">
+                {user.foodAllergy && (
+                  <div>
+                    <p className="text-sm text-gray-500">{t('profile.foodAllergy')}</p>
+                    <div className="flex items-start">
+                      <Utensils size={16} className="text-gray-400 mr-2 mt-1" />
+                      <p>{user.foodAllergy}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {user.personalMedicalCondition && (
+                  <div>
+                    <p className="text-sm text-gray-500">{t('profile.medicalCondition')}</p>
+                    <div className="flex items-start">
+                      <Stethoscope size={16} className="text-gray-400 mr-2 mt-1" />
+                      <p>{user.personalMedicalCondition}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex justify-between pt-4 mt-4">
+          <Link to="/profile/edit">
+            <Button variant="outline" className="flex items-center">
+              <Edit size={16} className="mr-2" />
+              {t('profile.edit')}
+            </Button>
+          </Link>
         </div>
       </div>
       
