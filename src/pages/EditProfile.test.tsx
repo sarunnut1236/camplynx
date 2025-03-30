@@ -26,7 +26,8 @@ vi.mock('react-i18next', () => ({
         'editProfile.medicalCondition': 'Medical Conditions',
         'editProfile.additionalInfo': 'Additional Information',
         'editProfile.jobTitle': 'Title',
-        'editProfile.bio': 'Bio'
+        'editProfile.bio': 'Bio',
+        'editProfile.memberCode': 'Member Code'
       };
       return translations[key] || key;
     }
@@ -52,7 +53,8 @@ vi.mock('@/contexts/AuthContext', () => ({
       foodAllergy: 'Nuts',
       personalMedicalCondition: 'None',
       bio: 'Test bio',
-      title: 'Developer'
+      title: 'Developer',
+      memberCode: 'YNS001'
     },
     updateUser: mockUpdateUser
   })
@@ -81,6 +83,7 @@ describe('EditProfile', () => {
     expect(screen.getByDisplayValue('Doe')).toBeInTheDocument();
     expect(screen.getByDisplayValue('JD')).toBeInTheDocument();
     expect(screen.getByDisplayValue('john@example.com')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('YNS001')).toBeInTheDocument(); // Check memberCode
   });
   
   it('updates form data when input changes', () => {
@@ -146,5 +149,18 @@ describe('EditProfile', () => {
     
     // Check if navigation happened
     expect(mockNavigate).toHaveBeenCalledWith('/profile');
+  });
+  
+  it('allows editing the member code', () => {
+    render(<EditProfile />);
+    
+    // Find the memberCode input by its label
+    const memberCodeInput = screen.getByLabelText('Member Code');
+    
+    // Change the value
+    fireEvent.change(memberCodeInput, { target: { value: 'YNS002' } });
+    
+    // Check if the input value was updated
+    expect(memberCodeInput).toHaveValue('YNS002');
   });
 }); 

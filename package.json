@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "ngrok": "npx ngrok http 8080"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_LIFF_ID: string;
-  // add more environment variables as needed
+  readonly VITE_LIFF_ID_DEV: string;
 }
 
 interface ImportMeta {

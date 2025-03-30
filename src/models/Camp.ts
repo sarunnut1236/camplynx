@@ -2,7 +2,7 @@
 export interface CampDay {
   id: string;
   dayNumber: number;
-  date: string;
+  date: Date;
   activities: string[];
 }
 
@@ -12,8 +12,8 @@ export interface Camp {
   name: string;
   description: string;
   location: string;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
   imageUrl: string;
   days: CampDay[];
   ownerId?: string;  // ID of the admin who created the camp
@@ -25,5 +25,5 @@ export interface Registration {
   userId: string;
   campId: string;
   dayAvailability: { [dayId: string]: boolean };
-  registrationDate: string;
+  registrationDate: Date;
 } 

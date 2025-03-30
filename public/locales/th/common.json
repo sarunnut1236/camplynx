@@ -45,7 +45,8 @@
     "thai": "ไทย",
     "details": "รายละเอียด",
     "roleAndPermissions": "บทบาทและสิทธิ์การใช้งาน",
-    "selectLanguage": "เลือกภาษา"
+    "selectLanguage": "เลือกภาษา",
+    "memberCode": "รหัสสมาชิก"
   },
   "editProfile": {
     "title": "แก้ไขโปรไฟล์",
@@ -67,7 +68,8 @@
     "saving": "กำลังบันทึก...",
     "cancel": "ยกเลิก",
     "clear": "ล้าง",
-    "required": "จำเป็น"
+    "required": "จำเป็น",
+    "memberCode": "รหัสสมาชิก"
   },
   "users": {
     "manageUsers": "จัดการผู้ใช้",
@@ -161,7 +163,8 @@
     "totalParticipants": "จำนวนผู้เข้าร่วมทั้งหมด",
     "registeredOn": "ลงทะเบียนเมื่อ",
     "availability": "ความพร้อม",
-    "dayAvailability": "ความพร้อมรายวัน"
+    "dayAvailability": "ความพร้อมรายวัน",
+    "memberCode": "รหัสสมาชิก"
   },
   "toast": {
     "campCreated": "สร้างค่ายสำเร็จ",

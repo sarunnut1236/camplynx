@@ -23,7 +23,8 @@ vi.mock('@/contexts/AuthContext', () => ({
       foodAllergy: 'Nuts',
       personalMedicalCondition: 'None',
       bio: 'Test bio',
-      title: 'Developer'
+      title: 'Developer',
+      memberCode: 'YNS001'
     }
   }),
   AuthProvider: ({ children }: { children: React.ReactNode }) => children
@@ -61,7 +62,8 @@ vi.mock('react-i18next', () => ({
         'profile.loginWithLine': 'Login with LINE',
         'profile.logoutFromLine': 'Logout from LINE',
         'profile.loginWithLineTest': 'Login with LINE (Test)',
-        'profile.logoutFromLineTest': 'Logout from LINE (Test)'
+        'profile.logoutFromLineTest': 'Logout from LINE (Test)',
+        'profile.memberCode': 'Member Code'
       };
       return translations[key] || key;
     }
@@ -128,6 +130,7 @@ describe('Profile', () => {
     expect(screen.getByText('123456789')).toBeInTheDocument();
     expect(screen.getByText('BKK')).toBeInTheDocument();
     expect(screen.getByText('john_doe')).toBeInTheDocument();
+    expect(screen.getByText('YNS001')).toBeInTheDocument();
   });
   
   it('shows health information', () => {

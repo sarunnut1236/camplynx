@@ -87,20 +87,20 @@ describe('Camps Component', () => {
       name: 'Test Camp 1',
       description: 'Description 1',
       location: 'Location 1',
-      startDate: '2023-01-01',
-      endDate: '2023-01-05',
+      startDate: new Date('2023-01-01'),
+      endDate: new Date('2023-01-05'),
       imageUrl: '/camp1.jpg',
-      days: [{ id: 'day1', dayNumber: 1, date: '2023-01-01', activities: ['Activity 1'] }]
+      days: [{ id: 'day1', dayNumber: 1, date: new Date('2023-01-01'), activities: ['Activity 1'] }]
     },
     {
       id: '2',
       name: 'Test Camp 2',
       description: 'Description 2',
       location: 'Location 2',
-      startDate: '2023-02-01',
-      endDate: '2023-02-05',
+      startDate: new Date('2023-02-01'),
+      endDate: new Date('2023-02-05'),
       imageUrl: '/camp2.jpg',
-      days: [{ id: 'day1', dayNumber: 1, date: '2023-02-01', activities: ['Activity 1'] }]
+      days: [{ id: 'day1', dayNumber: 1, date: new Date('2023-02-01'), activities: ['Activity 1'] }]
     }
   ];
 

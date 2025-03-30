@@ -3,15 +3,18 @@ import { LiffProfile, LiffData } from "@/models/Liff";
 
 // Get LIFF ID from environment variables
 const VITE_LIFF_ID = import.meta.env.VITE_LIFF_ID;
+const VITE_LIFF_ID_DEV = import.meta.env.VITE_LIFF_ID_DEV;
+
+const liffId = import.meta.env.MODE === 'development' ? VITE_LIFF_ID_DEV : VITE_LIFF_ID;
 
 // Define a function to initialize LIFF using Promise approach
 export const initializeLiff = (): Promise<LiffData> => {
-  if (!VITE_LIFF_ID) {
-    return Promise.reject(new Error("LIFF ID is not defined. Make sure VITE_LIFF_ID is set in your environment variables."));
+  if (!liffId) {
+    return Promise.reject(new Error("LIFF ID is not defined. Make sure VITE_LIFF_ID or VITE_LIFF_ID_DEV is set in your environment variables."));
   }
   
   return liff.init({
-    liffId: VITE_LIFF_ID,
+    liffId: liffId,
     withLoginOnExternalBrowser: true,
   })
   .then(() => {

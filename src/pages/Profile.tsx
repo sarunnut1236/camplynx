@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Edit, User as UserIcon, Mail, Phone, Calendar, MapPin, Gift, MessageCircle, Utensils, Stethoscope, Globe } from 'lucide-react';
+import { Edit, User as UserIcon, Mail, Phone, Calendar, MapPin, Gift, MessageCircle, Utensils, Stethoscope, Globe, CreditCard } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -136,13 +136,22 @@ const Profile = () => {
                 </div>
               </div>
             )}
-            
             {user.lineId && (
               <div>
                 <p className="text-sm text-gray-500">{t('profile.lineId')}</p>
                 <div className="flex items-center">
                   <MessageCircle size={16} className="text-gray-400 mr-2" />
                   <p>{user.lineId}</p>
+                </div>
+              </div>
+            )}
+            
+            {user.memberCode && (
+              <div>
+                <p className="text-sm text-gray-500">{t('profile.memberCode')}</p>
+                <div className="flex items-center">
+                  <CreditCard size={16} className="text-gray-400 mr-2" />
+                  <p>{user.memberCode}</p>
                 </div>
               </div>
             )}

@@ -60,6 +60,7 @@ const EditProfile = () => {
     personalMedicalCondition: user?.personalMedicalCondition || '',
     title: user?.title || '',
     bio: user?.bio || '',
+    memberCode: user?.memberCode || '',
   });
 
   // Extra state for date handling - Joined Date
@@ -257,6 +258,26 @@ const EditProfile = () => {
               id="phone"
               name="phone"
               value={formData.phone || ''}
+              onChange={handleChange}
+              className="form-input"
+            />
+          </div>
+          
+          <div className="form-group">
+            <div className="flex justify-between">
+              <Label htmlFor="memberCode" className="form-label">{t('editProfile.memberCode')}</Label>
+              <button 
+                type="button"
+                onClick={() => handleClearOptionalField('memberCode')}
+                className="text-xs text-red-500"
+              >
+                {t('editProfile.clear')}
+              </button>
+            </div>
+            <Input
+              id="memberCode"
+              name="memberCode"
+              value={formData.memberCode || ''}
               onChange={handleChange}
               className="form-input"
             />

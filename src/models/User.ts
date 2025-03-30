@@ -18,4 +18,6 @@ export interface User {
     personalMedicalCondition?: string;
     bio?: string;
     title?: string;
+    memberCode?: string;
+    jwtLiffUserId?: string;
   }

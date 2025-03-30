@@ -30,20 +30,20 @@ const mockCamp = {
   name: 'Test Camp',
   description: 'Test Description',
   location: 'Test Location',
-  startDate: '2023-01-01',
-  endDate: '2023-01-05',
+  startDate: new Date('2023-01-01'),
+  endDate: new Date('2023-01-05'),
   imageUrl: '/camp.jpg',
   days: [
     {
       id: 'day1',
       dayNumber: 1,
-      date: '2023-01-01',
+      date: new Date('2023-01-01'),
       activities: ['Activity 1', 'Activity 2']
     },
     {
       id: 'day2',
       dayNumber: 2,
-      date: '2023-01-02',
+      date: new Date('2023-01-02'),
       activities: ['Activity 3']
     }
   ]
@@ -56,14 +56,14 @@ const mockRegistrations: Registration[] = [
     userId: 'user1',
     campId: '1',
     dayAvailability: { day1: true, day2: false },
-    registrationDate: '2023-01-01'
+    registrationDate: new Date('2023-01-01')
   },
   {
     id: 'reg2',
     userId: 'user2',
     campId: '1',
     dayAvailability: { day1: true, day2: true },
-    registrationDate: '2023-01-02'
+    registrationDate: new Date('2023-01-02')
   }
 ];
 
