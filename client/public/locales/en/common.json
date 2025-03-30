@@ -45,7 +45,8 @@
     "thai": "Thai",
     "details": "Details",
     "roleAndPermissions": "Role & Permissions",
-    "selectLanguage": "Select Language"
+    "selectLanguage": "Select Language",
+    "memberCode": "Member Code"
   },
   "editProfile": {
     "title": "Edit Profile",
@@ -67,7 +68,8 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "clear": "Clear",
-    "required": "Required"
+    "required": "Required",
+    "memberCode": "Member Code"
   },
   "users": {
     "manageUsers": "Manage Users",
@@ -161,7 +163,8 @@
     "totalParticipants": "Total Participants",
     "registeredOn": "Registered on",
     "availability": "Availability",
-    "dayAvailability": "Day Availability"
+    "dayAvailability": "Day Availability",
+    "memberCode": "Member Code"
   },
   "toast": {
     "campCreated": "Camp created",

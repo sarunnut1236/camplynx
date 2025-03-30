@@ -33,7 +33,8 @@ describe('User Model', () => {
       foodAllergy: 'None',
       personalMedicalCondition: 'None',
       bio: 'Test user',
-      title: 'Mr.'
+      title: 'Mr.',
+      memberCode: 'YS05000'
     };
 
     expect(user.id).toBe('2');
@@ -52,5 +53,6 @@ describe('User Model', () => {
     expect(user.personalMedicalCondition).toBe('None');
     expect(user.bio).toBe('Test user');
     expect(user.title).toBe('Mr.');
+    expect(user.memberCode).toBe('YS05000');
   });
 }); 

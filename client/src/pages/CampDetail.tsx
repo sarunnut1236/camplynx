@@ -43,8 +43,7 @@ const CampDetail = () => {
   const isAdmin = hasPermission(UserRole.ADMIN);
   
   // Format date function that depends on i18n
-  const formatDate = useCallback((dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = useCallback((date: Date) => {
     return date.toLocaleDateString(i18n.language, { weekday: 'long', month: 'long', day: 'numeric' });
   }, [i18n.language]);
   

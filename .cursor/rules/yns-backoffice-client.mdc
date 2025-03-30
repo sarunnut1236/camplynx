@@ -10,6 +10,8 @@ alwaysApply: true
 ---
 
 # Rules when developing code
+I'm using Windows, please use terminal command for Windows
+write code in /client folder
 
 - When you create a new file, always write testcase for it if it is in these folders: /src/contexts, /src/hooks, /src/lib, /src/models, /src/pages, /src/providers, /src/utils
 - When you edit the existing file, always run ```npm run test``` to validate that your new code doesn't break current logic. If you broke it, try to fix it until it passes.

@@ -7,26 +7,26 @@ const mockCamps: Camp[] = [
     name: 'Camp Happy New Year 2024',
     description: 'Celebrate the new year with outdoor activities and fun!',
     location: 'Pine Forest Retreat',
-    startDate: '2024-01-01',
-    endDate: '2024-01-03',
+    startDate: new Date('2024-01-01'),
+    endDate: new Date('2024-01-03'),
     imageUrl: 'https://images.unsplash.com/photo-1496080174650-637e3f22fa03?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     days: [
       {
         id: 'd1',
         dayNumber: 1,
-        date: '2024-01-01',
+        date: new Date('2024-01-01'),
         activities: ['Welcome Breakfast', 'Campfire Games']
       },
       {
         id: 'd2',
         dayNumber: 2,
-        date: '2024-01-02',
+        date: new Date('2024-01-02'),
         activities: ['Sunrise Hike', 'Swimming']
       },
       {
         id: 'd3',
         dayNumber: 3,
-        date: '2024-01-03',
+        date: new Date('2024-01-03'),
         activities: ['Nature Walk', 'Farewell Lunch']
       }
     ]
@@ -36,26 +36,26 @@ const mockCamps: Camp[] = [
     name: 'Summer Adventure Camp',
     description: 'Explore nature and learn outdoor survival skills',
     location: 'Mountain Valley',
-    startDate: '2024-06-15',
-    endDate: '2024-06-17',
+    startDate: new Date('2024-06-15'),
+    endDate: new Date('2024-06-17'),
     imageUrl: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
     days: [
       {
         id: 'd4',
         dayNumber: 1,
-        date: '2024-06-15',
+        date: new Date('2024-06-15'),
         activities: ['Campfire Games', 'Night Sky Observation']
       },
       {
         id: 'd5',
         dayNumber: 2,
-        date: '2024-06-16',
+        date: new Date('2024-06-16'),
         activities: ['Arts and Crafts', 'Swimming']
       },
       {
         id: 'd6',
         dayNumber: 3,
-        date: '2024-06-17',
+        date: new Date('2024-06-17'),
         activities: ['Nature Hike', 'Survival Skills Workshop']
       }
     ]
@@ -64,6 +64,28 @@ const mockCamps: Camp[] = [
 
 // Mock registrations data (initially empty)
 const mockRegistrations: Registration[] = [];
+
+// Helper function to convert string dates to Date objects in camps
+const parseDatesInCamp = (camp: any): Camp => {
+  return {
+    ...camp,
+    startDate: camp.startDate instanceof Date ? camp.startDate : new Date(camp.startDate),
+    endDate: camp.endDate instanceof Date ? camp.endDate : new Date(camp.endDate),
+    days: camp.days.map((day: any) => ({
+      ...day,
+      date: day.date instanceof Date ? day.date : new Date(day.date)
+    }))
+  };
+};
+
+// Helper function to convert string dates to Date objects in registrations
+const parseDatesInRegistration = (registration: any): Registration => {
+  return {
+    ...registration,
+    registrationDate: registration.registrationDate instanceof Date ? 
+      registration.registrationDate : new Date(registration.registrationDate)
+  };
+};
 
 // Get all camps
 export const getAllCamps = async (): Promise<Camp[]> => {
@@ -74,7 +96,13 @@ export const getAllCamps = async (): Promise<Camp[]> => {
   try {
     const savedCamps = localStorage.getItem('yns_camps');
     if (savedCamps) {
-      return JSON.parse(savedCamps);
+      const parsedCamps = JSON.parse(savedCamps);
+      // Handle both array and single object
+      if (Array.isArray(parsedCamps)) {
+        return parsedCamps.map(parseDatesInCamp);
+      } else {
+        return [parseDatesInCamp(parsedCamps)];
+      }
     }
   } catch (error) {
     console.error("Error loading camps from localStorage:", error);
@@ -179,7 +207,13 @@ export const getAllRegistrations = async (): Promise<Registration[]> => {
   try {
     const savedRegistrations = localStorage.getItem('yns_registrations');
     if (savedRegistrations) {
-      return JSON.parse(savedRegistrations);
+      const parsedRegistrations = JSON.parse(savedRegistrations);
+      // Handle both array and single object
+      if (Array.isArray(parsedRegistrations)) {
+        return parsedRegistrations.map(parseDatesInRegistration);
+      } else {
+        return [parseDatesInRegistration(parsedRegistrations)];
+      }
     }
   } catch (error) {
     console.error("Error loading registrations from localStorage:", error);
@@ -236,7 +270,7 @@ export const registerForCamp = async (
     userId,
     campId,
     dayAvailability,
-    registrationDate: new Date().toISOString(),
+    registrationDate: new Date(),
   };
   
   const registrations = await getAllRegistrations();

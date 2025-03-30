@@ -54,18 +54,24 @@ describe('Camp Providers', () => {
         name: 'Test Camp',
         description: 'A test camp from localStorage',
         location: 'Test Location',
-        startDate: '2024-01-01',
-        endDate: '2024-01-03',
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-01-03'),
         imageUrl: 'http://example.com/image.jpg',
         days: []
       };
       
-      localStorage.setItem('yns_camps', JSON.stringify([mockCamp]));
+      // When storing to localStorage, dates become strings - simulate that behavior
+      // Make sure to store as an array
+      const mockCampsArray = [mockCamp];
+      const mockCampStringified = JSON.stringify(mockCampsArray);
+      localStorage.setItem('yns_camps', mockCampStringified);
 
       const camps = await getAllCamps();
       expect(camps.length).toBe(1);
       expect(camps[0]?.name).toBe('Test Camp');
       expect(camps[0]?.description).toBe('A test camp from localStorage');
+      expect(camps[0]?.startDate).toBeInstanceOf(Date);
+      expect(camps[0]?.endDate).toBeInstanceOf(Date);
     });
   });
 
@@ -76,8 +82,8 @@ describe('Camp Providers', () => {
         name: 'Test Camp',
         description: 'A test camp',
         location: 'Test Location',
-        startDate: '2024-01-01',
-        endDate: '2024-01-03',
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-01-03'),
         imageUrl: 'http://example.com/image.jpg',
         days: []
       };
@@ -88,6 +94,7 @@ describe('Camp Providers', () => {
       expect(camp).toBeDefined();
       expect(camp?.id).toBe('test-id');
       expect(camp?.name).toBe('Test Camp');
+      expect(camp?.startDate).toBeInstanceOf(Date);
     });
 
     it('should return undefined for non-existent camp ID', async () => {
@@ -102,8 +109,8 @@ describe('Camp Providers', () => {
         name: 'New Camp',
         description: 'A newly created camp',
         location: 'New Location',
-        startDate: '2024-01-01',
-        endDate: '2024-01-03',
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-01-03'),
         imageUrl: 'http://example.com/image.jpg',
         days: []
       };
@@ -112,6 +119,7 @@ describe('Camp Providers', () => {
       expect(newCamp).toBeDefined();
       expect(newCamp.id).toBeDefined();
       expect(newCamp.name).toBe('New Camp');
+      expect(newCamp.startDate).toBeInstanceOf(Date);
       
       // Verify it was stored in localStorage
       expect(localStorage.setItem).toHaveBeenCalled();
@@ -125,8 +133,8 @@ describe('Camp Providers', () => {
         name: 'Camp to Update',
         description: 'Original description',
         location: 'Original location',
-        startDate: '2024-01-01',
-        endDate: '2024-01-03',
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-01-03'),
         imageUrl: 'http://example.com/image.jpg',
         days: []
       };
@@ -143,6 +151,8 @@ describe('Camp Providers', () => {
       expect(updatedCamp?.name).toBe('Camp to Update');
       expect(updatedCamp?.description).toBe('Updated description');
       expect(updatedCamp?.location).toBe('Updated location');
+      expect(updatedCamp?.startDate).toBeInstanceOf(Date);
+      expect(updatedCamp?.endDate).toBeInstanceOf(Date);
     });
 
     it('should return undefined when updating non-existent camp', async () => {
@@ -161,8 +171,8 @@ describe('Camp Providers', () => {
         name: 'Camp to Delete',
         description: 'To be deleted',
         location: 'Location',
-        startDate: '2024-01-01',
-        endDate: '2024-01-03',
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-01-03'),
         imageUrl: 'http://example.com/image.jpg',
         days: []
       };
@@ -172,7 +182,7 @@ describe('Camp Providers', () => {
         userId: 'user-1',
         campId: 'delete-id',
         dayAvailability: {},
-        registrationDate: '2024-01-01T12:00:00Z'
+        registrationDate: new Date('2024-01-01T12:00:00Z')
       };
 
       localStorage.setItem('yns_camps', JSON.stringify([mockCamp]));
@@ -197,7 +207,7 @@ describe('Camp Providers', () => {
       userId: 'user-id',
       campId: 'camp-id',
       dayAvailability: {'day-1': true, 'day-2': false},
-      registrationDate: '2024-01-01T12:00:00Z'
+      registrationDate: new Date('2024-01-01T12:00:00Z')
     };
 
     beforeEach(() => {
@@ -208,6 +218,7 @@ describe('Camp Providers', () => {
       const registrations = await getAllRegistrations();
       expect(registrations.length).toBe(1);
       expect(registrations[0]?.id).toBe('reg-id');
+      expect(registrations[0]?.registrationDate).toBeInstanceOf(Date);
     });
 
     it('should get registrations by user ID', async () => {
@@ -215,12 +226,14 @@ describe('Camp Providers', () => {
       expect(registrations.length).toBe(1);
       expect(registrations[0]?.id).toBe('reg-id');
       expect(registrations[0]?.userId).toBe('user-id');
+      expect(registrations[0]?.registrationDate).toBeInstanceOf(Date);
     });
 
     it('should get registration by ID', async () => {
       const registration = await getRegistrationById('reg-id');
       expect(registration).toBeDefined();
       expect(registration?.id).toBe('reg-id');
+      expect(registration?.registrationDate).toBeInstanceOf(Date);
     });
 
     it('should get registration by camp and user', async () => {
@@ -228,6 +241,7 @@ describe('Camp Providers', () => {
       expect(registration).toBeDefined();
       expect(registration?.campId).toBe('camp-id');
       expect(registration?.userId).toBe('user-id');
+      expect(registration?.registrationDate).toBeInstanceOf(Date);
     });
 
     it('should register a user for a camp', async () => {
@@ -238,6 +252,7 @@ describe('Camp Providers', () => {
       expect(registration?.userId).toBe('new-user');
       expect(registration?.campId).toBe('camp-id');
       expect(registration?.dayAvailability).toEqual(dayAvailability);
+      expect(registration?.registrationDate).toBeInstanceOf(Date);
       
       // Verify it was stored in localStorage
       expect(localStorage.setItem).toHaveBeenCalled();
@@ -248,18 +263,21 @@ describe('Camp Providers', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should update registration', async () => {
-      const newAvailability = {'day-1': false, 'day-2': true};
+    it('should update a registration', async () => {
+      const updatedDayAvailability = {'day-1': false, 'day-2': true};
       
-      const updated = await updateRegistration('reg-id', newAvailability);
-      expect(updated).toBeDefined();
-      expect(updated?.id).toBe('reg-id');
-      expect(updated?.dayAvailability).toEqual(newAvailability);
+      const updatedRegistration = await updateRegistration('reg-id', updatedDayAvailability);
+      expect(updatedRegistration).toBeDefined();
+      expect(updatedRegistration?.id).toBe('reg-id');
+      expect(updatedRegistration?.dayAvailability).toEqual(updatedDayAvailability);
+      
+      // Verify it was stored in localStorage
+      expect(localStorage.setItem).toHaveBeenCalled();
     });
-
-    it('should return undefined when updating non-existent registration', async () => {
-      const updated = await updateRegistration('non-existent', {});
-      expect(updated).toBeUndefined();
+    
+    it('should return undefined when updating a non-existent registration', async () => {
+      const result = await updateRegistration('non-existent-id', {});
+      expect(result).toBeUndefined();
     });
   });
 }); 

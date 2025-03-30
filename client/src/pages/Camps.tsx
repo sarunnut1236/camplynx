@@ -20,10 +20,8 @@ const Camps = () => {
   const isAdmin = hasPermission(UserRole.ADMIN);
 
   // Move the date formatting logic inside the component
-  const formatDateRange = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return `${formatDate(start, i18n.language)} - ${formatDate(end, i18n.language)}`;
+  const formatDateRange = (startDate: Date, endDate: Date) => {
+    return `${formatDate(startDate, i18n.language)} - ${formatDate(endDate, i18n.language)}`;
   };
 
   return (

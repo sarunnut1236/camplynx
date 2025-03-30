@@ -72,8 +72,7 @@ const CampParticipants = () => {
   }, [id, registrations]);
   
   // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (date: Date) => {
     return date.toLocaleDateString();
   };
   
@@ -143,6 +142,11 @@ const CampParticipants = () => {
                       </p>
                       {participant.user.email && (
                         <p className="text-sm text-gray-500">{participant.user.email}</p>
+                      )}
+                      {participant.user.memberCode && (
+                        <p className="text-sm text-gray-600">
+                          <span className="font-medium">{t('camps.memberCode')}:</span> {participant.user.memberCode}
+                        </p>
                       )}
                       <p className="text-xs text-gray-400 mt-1">
                         {t('camps.registeredOn')}: {formatDate(participant.registration.registrationDate)}
