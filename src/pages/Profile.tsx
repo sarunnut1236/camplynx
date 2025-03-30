@@ -136,7 +136,6 @@ const Profile = () => {
                 </div>
               </div>
             )}
-            
             {user.lineId && (
               <div>
                 <p className="text-sm text-gray-500">{t('profile.lineId')}</p>
